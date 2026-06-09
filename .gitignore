@@ -4,8 +4,10 @@ __pycache__/
 *.pyc
 temp_generate.py
 get-pip.py
-.gitignore
 .env
+
+# Vercel local cache
+.vercel
 
 # Web app uploads (keep folder, ignore contents)
 uploads/*

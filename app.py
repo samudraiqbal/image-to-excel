@@ -24,21 +24,62 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
-# In-memory job store: job_id -> { queue, output_file, status, filename }
+# In-memory job store: job_id -> { queue, output_file, status, download_name }
 jobs: dict = {}
 
 
+# ─── CORS helper ─────────────────────────────────────────────────────────────
+def _cors_headers(response):
+    """Tambahkan CORS headers agar Vercel frontend bisa akses local API."""
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Max-Age"] = "3600"
+    return response
+
+
+@app.after_request
+def add_cors(response):
+    return _cors_headers(response)
+
+
+@app.route("/v1/", methods=["OPTIONS"])
+@app.route("/v1/<path:path>", methods=["OPTIONS"])
+def handle_options(path=""):
+    """Handle CORS preflight OPTIONS request."""
+    resp = make_response("", 204)
+    return _cors_headers(resp)
+
+
+# ─── Helpers ─────────────────────────────────────────────────────────────────
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def sanitize_name(name: str) -> str:
+    safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_ ()[]")
+    return "".join(c for c in name if c in safe_chars).strip()
+
+
+# ─── Local Flask UI (localhost only) ─────────────────────────────────────────
 @app.route("/")
 def index():
-    return render_template("index.html")
+    resp = make_response(render_template("index.html"))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
 
 
-@app.route("/upload", methods=["POST"])
-def upload():
+# ─── Health check (untuk Vercel frontend detect apakah local server aktif) ──
+@app.route("/v1/health")
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok", "service": "image-to-excel"})
+
+
+# ─── API routes (with /v1 prefix for public tunnel) ──────────────────────────
+def _do_upload():
+    """Core upload logic, shared by both /upload and /v1/upload."""
     if "image" not in request.files:
         return jsonify({"error": "No file part in request"}), 400
 
@@ -50,18 +91,12 @@ def upload():
 
     job_id = str(uuid.uuid4())
     ext = file.filename.rsplit(".", 1)[1].lower()
-    saved_name = f"{job_id}.{ext}"
-    image_path = os.path.join(UPLOAD_DIR, saved_name)
+    image_path = os.path.join(UPLOAD_DIR, f"{job_id}.{ext}")
     file.save(image_path)
 
     output_xlsx = os.path.splitext(image_path)[0] + ".xlsx"
 
-    # Use user-provided output name, or fall back to original filename stem
-    custom_name = request.form.get("output_name", "").strip()
-    if custom_name:
-        # Sanitize: remove path separators and illegal chars
-        safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_ ()[]")
-        custom_name = "".join(c for c in custom_name if c in safe_chars).strip()
+    custom_name = sanitize_name(request.form.get("output_name", "").strip())
     if not custom_name:
         custom_name = os.path.splitext(file.filename)[0]
     download_name = custom_name + ".xlsx"
@@ -74,7 +109,6 @@ def upload():
         "download_name": download_name,
     }
 
-    # Run generate_excel.py in a background thread
     def run_generation():
         try:
             proc = subprocess.Popen(
@@ -96,21 +130,19 @@ def upload():
                 q.put(("done", "Excel berhasil digenerate!"))
             else:
                 jobs[job_id]["status"] = "error"
-                q.put(("error", "Proses generate Excel gagal. Cek terminal untuk detail."))
+                q.put(("error", "Proses generate Excel gagal."))
         except Exception as e:
             jobs[job_id]["status"] = "error"
             q.put(("error", str(e)))
         finally:
-            q.put(None)  # sentinel to stop SSE
+            q.put(None)
 
-    t = threading.Thread(target=run_generation, daemon=True)
-    t.start()
-
+    threading.Thread(target=run_generation, daemon=True).start()
     return jsonify({"job_id": job_id, "filename": file.filename, "download_name": download_name})
 
 
-@app.route("/stream/<job_id>")
-def stream(job_id: str):
+def _do_stream(job_id: str):
+    """Core SSE stream logic."""
     if job_id not in jobs:
         return jsonify({"error": "Job not found"}), 404
 
@@ -119,11 +151,9 @@ def stream(job_id: str):
         while True:
             item = q.get()
             if item is None:
-                # End of stream
                 yield "event: end\ndata: done\n\n"
                 break
             event_type, data = item
-            # Escape newlines inside data field
             safe_data = data.replace("\n", " ").replace("\r", "")
             yield f"event: {event_type}\ndata: {safe_data}\n\n"
 
@@ -134,38 +164,71 @@ def stream(job_id: str):
             "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",
             "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
         },
     )
 
 
-@app.route("/download/<job_id>")
-def download(job_id: str):
+def _do_download(job_id: str):
+    """Core download logic."""
     if job_id not in jobs:
         return jsonify({"error": "Job not found"}), 404
-
     job = jobs[job_id]
     if job["status"] != "done":
         return jsonify({"error": "File not ready yet"}), 400
-
     output_file = job["output_file"]
     if not os.path.exists(output_file):
         return jsonify({"error": "Output file not found"}), 404
 
     download_name = job.get("download_name", "output.xlsx")
-
-    # Build response with explicit Content-Disposition to avoid UUID filename bug
-    response = make_response(send_file(output_file, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-    # RFC 5987 encoding for non-ASCII filenames
     encoded_name = quote(download_name, safe="")
+    response = make_response(send_file(
+        output_file,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ))
     response.headers["Content-Disposition"] = (
         f"attachment; filename=\"{download_name}\"; filename*=UTF-8''{encoded_name}"
     )
     return response
 
 
+# Routes tanpa prefix (untuk localhost testing via Flask UI)
+@app.route("/upload", methods=["POST"])
+def upload():
+    return _do_upload()
+
+
+@app.route("/stream/<job_id>")
+def stream(job_id: str):
+    return _do_stream(job_id)
+
+
+@app.route("/download/<job_id>")
+def download(job_id: str):
+    return _do_download(job_id)
+
+
+# Routes dengan /v1 prefix (untuk akses dari Vercel via tunnel)
+@app.route("/v1/upload", methods=["POST"])
+def v1_upload():
+    return _do_upload()
+
+
+@app.route("/v1/stream/<job_id>")
+def v1_stream(job_id: str):
+    return _do_stream(job_id)
+
+
+@app.route("/v1/download/<job_id>")
+def v1_download(job_id: str):
+    return _do_download(job_id)
+
+
 if __name__ == "__main__":
     print("=" * 50)
     print("  Image to Excel - Web App")
-    print("  Buka browser: http://localhost:5000")
+    print("  Local UI : http://localhost:5000")
+    print("  API v1   : http://localhost:5000/v1")
+    print("  Tunnel   : https://r3huyik.abc-tunnel.us/v1")
     print("=" * 50)
     app.run(debug=False, port=5000, threaded=True)
