@@ -272,7 +272,11 @@
 <script>
   // ─── Tunnel URL (configurable, saved in localStorage) ─────────────────────
   var LS_KEY = 'imgxl_tunnel_url';
-  var TH = { 'bypass-tunnel-reminder': 'true' };
+  // ─── Tunnel headers (bypass popup untuk localtunnel & ngrok) ─────────────
+  var TH = {
+    'bypass-tunnel-reminder': 'true',       // localtunnel
+    'ngrok-skip-browser-warning': 'true'    // ngrok
+  };
 
   function getApiBase() {
     return (localStorage.getItem(LS_KEY) || '').replace(/\/$/, '');
