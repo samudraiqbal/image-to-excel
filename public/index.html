@@ -16,6 +16,7 @@
       --accent: #63b3ed; --accent2: #7c3aed; --accent-glow: rgba(99,179,237,0.15);
       --success: #48bb78; --success-glow: rgba(72,187,120,0.15);
       --error: #fc8181; --error-glow: rgba(252,129,129,0.15);
+      --warning: #f6ad55;
       --text: #e2e8f0; --text-muted: #718096; --text-dim: #4a5568;
     }
     html, body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
@@ -23,93 +24,107 @@
       background-image: radial-gradient(ellipse at 20% 20%, rgba(99,179,237,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.06) 0%, transparent 50%);
       display: flex; flex-direction: column; min-height: 100vh;
     }
-    .header { padding: 20px 40px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); background: rgba(10,14,26,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; }
-    .header-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-    .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); transition: background 0.3s; }
-    .status-dot.online { background: var(--success); box-shadow: 0 0 0 3px rgba(72,187,120,0.2); }
+    .header { padding: 16px 40px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); background: rgba(10,14,26,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; }
+    .header-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .header h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .status-pill { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+    .status-pill:hover { background: var(--surface-hover); border-color: var(--border-active); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); transition: background 0.3s; flex-shrink: 0; }
+    .status-dot.online { background: var(--success); box-shadow: 0 0 0 2px rgba(72,187,120,0.25); }
     .status-dot.offline { background: var(--error); }
-    .status-label { font-size: 12px; color: var(--text-muted); }
-    .main { flex: 1; padding: 48px 40px; max-width: 840px; margin: 0 auto; width: 100%; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
-    .card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 20px; }
-    .alert-banner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: var(--text-muted); }
-    .alert-banner strong { color: var(--text); }
-    #drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden; }
+    .status-dot.checking { background: var(--warning); }
+    .main { flex: 1; padding: 36px 40px; max-width: 820px; margin: 0 auto; width: 100%; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 20px; }
+    .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 18px; }
+
+    /* Tunnel Config Panel */
+    #tunnel-panel { background: rgba(246,173,85,0.06); border: 1px solid rgba(246,173,85,0.2); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
+    .tunnel-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .tunnel-icon { font-size: 18px; }
+    .tunnel-title { font-size: 14px; font-weight: 600; color: var(--warning); }
+    .tunnel-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .tunnel-input-row { display: flex; gap: 8px; }
+    #tunnel-url-input { flex: 1; background: var(--bg2); border: 1px solid rgba(246,173,85,0.3); border-radius: 8px; padding: 9px 13px; font-size: 13px; color: var(--text); font-family: 'Courier New', monospace; outline: none; transition: border-color 0.2s; }
+    #tunnel-url-input:focus { border-color: var(--warning); }
+    #tunnel-url-input::placeholder { color: var(--text-dim); font-family: inherit; }
+    #btn-save-tunnel { padding: 9px 16px; background: rgba(246,173,85,0.15); color: var(--warning); border: 1px solid rgba(246,173,85,0.3); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+    #btn-save-tunnel:hover { background: rgba(246,173,85,0.25); }
+    .tunnel-hint { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+    .tunnel-hint code { background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 4px; font-family: 'Courier New', monospace; color: var(--text-muted); }
+
+    /* Server offline banner */
+    #offline-banner { display: none; background: var(--error-glow); border: 1px solid rgba(252,129,129,0.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--error); }
+    #offline-banner strong { display: block; margin-bottom: 2px; }
+
+    /* Drop Zone */
+    #drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 44px 24px; text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden; }
     #drop-zone::before { content: ''; position: absolute; inset: 0; background: var(--accent-glow); opacity: 0; transition: opacity 0.25s; }
     #drop-zone:hover, #drop-zone.drag-over { border-color: var(--border-active); background: var(--surface-hover); }
     #drop-zone:hover::before, #drop-zone.drag-over::before { opacity: 1; }
-    #drop-zone.drag-over { transform: scale(1.01); }
-    .drop-icon { font-size: 48px; margin-bottom: 16px; display: block; transition: transform 0.3s; }
+    .drop-icon { font-size: 44px; margin-bottom: 14px; display: block; transition: transform 0.3s; }
     #drop-zone:hover .drop-icon { transform: translateY(-4px); }
-    .drop-label { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .drop-label { font-size: 15px; font-weight: 500; margin-bottom: 5px; }
     .drop-hint { font-size: 12px; color: var(--text-muted); }
     .drop-hint span { color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-    #file-preview { display: none; margin-top: 16px; padding: 14px 16px; background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 10px; align-items: center; gap: 12px; }
+    #file-preview { display: none; margin-top: 14px; padding: 12px 14px; background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 10px; align-items: center; gap: 12px; }
     #file-preview.show { display: flex; }
-    #preview-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
-    #preview-info { flex: 1; }
+    #preview-thumb { width: 44px; height: 44px; border-radius: 7px; object-fit: cover; border: 1px solid var(--border); }
     #preview-name { font-weight: 500; font-size: 13px; word-break: break-all; }
     #preview-size { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    #preview-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 4px; line-height: 1; transition: color 0.2s; }
+    #preview-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 17px; padding: 4px; line-height: 1; transition: color 0.2s; margin-left: auto; }
     #preview-remove:hover { color: var(--error); }
     #file-input { display: none; }
-    .input-group { margin-top: 16px; }
-    .input-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; letter-spacing: 0.03em; }
+    .input-group { margin-top: 14px; }
+    .input-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.03em; }
     .input-row { display: flex; align-items: center; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
     .input-row:focus-within { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(99,179,237,0.1); }
-    .input-prefix, .input-suffix { padding: 10px 12px; font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.03); white-space: nowrap; user-select: none; }
+    .input-prefix, .input-suffix { padding: 10px 11px; font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.03); white-space: nowrap; }
     .input-prefix { border-right: 1px solid var(--border); }
     .input-suffix { border-left: 1px solid var(--border); }
     #output-name { flex: 1; background: transparent; border: none; outline: none; padding: 10px 12px; font-size: 13px; color: var(--text); font-family: inherit; }
     #output-name::placeholder { color: var(--text-dim); }
-    #btn-generate { width: 100%; padding: 14px 24px; margin-top: 16px; background: linear-gradient(135deg, var(--accent), #4299e1); color: white; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.02em; font-family: inherit; }
+    #btn-generate { width: 100%; padding: 13px 24px; margin-top: 14px; background: linear-gradient(135deg, var(--accent), #4299e1); color: white; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
     #btn-generate:hover:not(:disabled) { background: linear-gradient(135deg, #4299e1, #3182ce); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,179,237,0.3); }
     #btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
     #progress-card { display: none; }
     #progress-card.show { display: block; }
-    .steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
-    .step { display: flex; align-items: flex-start; gap: 16px; padding: 14px 0; position: relative; }
-    .step:not(:last-child)::after { content: ''; position: absolute; left: 15px; top: 44px; bottom: 0; width: 2px; background: var(--border); transition: background 0.4s; }
+    .steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
+    .step { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; left: 14px; top: 42px; bottom: 0; width: 2px; background: var(--border); transition: background 0.4s; }
     .step.done:not(:last-child)::after { background: var(--success); }
     .step.active:not(:last-child)::after { background: var(--accent); }
-    .step-icon { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; transition: all 0.3s ease; position: relative; z-index: 1; }
-    .step.active .step-icon { border-color: var(--accent); background: var(--accent-glow); }
+    .step-icon { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; transition: all 0.3s; z-index: 1; }
+    .step.active .step-icon { border-color: var(--accent); background: var(--accent-glow); animation: pulse-ring 1.5s ease-out infinite; }
     .step.done .step-icon { border-color: var(--success); background: var(--success-glow); }
     .step.error .step-icon { border-color: var(--error); background: var(--error-glow); }
-    .step-body { flex: 1; }
     .step-title { font-weight: 500; font-size: 13px; }
     .step.active .step-title { color: var(--accent); }
     .step.done .step-title { color: var(--success); }
     .step.error .step-title { color: var(--error); }
     .step-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { width: 14px; height: 14px; border: 2px solid rgba(99,179,237,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(99,179,237,0.4); } 70% { box-shadow: 0 0 0 8px rgba(99,179,237,0); } 100% { box-shadow: 0 0 0 0 rgba(99,179,237,0); } }
-    .step.active .step-icon { animation: pulse-ring 1.5s ease-out infinite; }
-    .log-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; padding: 8px 0; border-top: 1px solid var(--border); user-select: none; margin-top: 8px; }
-    .log-toggle:hover { color: var(--text); }
+    .spinner { width: 13px; height: 13px; border: 2px solid rgba(99,179,237,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(99,179,237,0.4)}70%{box-shadow:0 0 0 7px rgba(99,179,237,0)}100%{box-shadow:0 0 0 0 rgba(99,179,237,0)} }
+    .log-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; padding: 8px 0; border-top: 1px solid var(--border); user-select: none; margin-top: 6px; }
     .log-toggle .chevron { transition: transform 0.2s; font-size: 10px; }
     .log-toggle.open .chevron { transform: rotate(180deg); }
-    #log-box { display: none; margin-top: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'Courier New', monospace; font-size: 11px; color: #a0aec0; max-height: 200px; overflow-y: auto; line-height: 1.8; }
+    #log-box { display: none; margin-top: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; font-family: 'Courier New', monospace; font-size: 11px; color: #a0aec0; max-height: 180px; overflow-y: auto; line-height: 1.8; }
     #log-box.show { display: block; }
     .log-line { display: block; }
     .log-line.success { color: var(--success); }
     .log-line.error { color: var(--error); }
     .log-line.info { color: var(--accent); }
-    .error-banner { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px; background: var(--error-glow); border: 1px solid rgba(252,129,129,0.25); border-radius: 12px; margin-top: 16px; }
-    .error-banner-icon { font-size: 20px; flex-shrink: 0; }
+    .error-banner { display: flex; align-items: flex-start; gap: 11px; padding: 14px 18px; background: var(--error-glow); border: 1px solid rgba(252,129,129,0.25); border-radius: 11px; margin-top: 14px; }
     .error-banner-text { font-size: 13px; color: var(--error); }
     #download-card { display: none; }
     #download-card.show { display: block; }
-    .success-banner { display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: var(--success-glow); border: 1px solid rgba(72,187,120,0.25); border-radius: 12px; margin-bottom: 20px; }
-    .success-icon { font-size: 32px; }
-    .success-text h3 { font-size: 15px; font-weight: 600; color: var(--success); }
+    .success-banner { display: flex; align-items: center; gap: 14px; padding: 18px 22px; background: var(--success-glow); border: 1px solid rgba(72,187,120,0.25); border-radius: 11px; margin-bottom: 18px; }
+    .success-text h3 { font-size: 14px; font-weight: 600; color: var(--success); }
     .success-text p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    #btn-download { width: 100%; padding: 14px 24px; background: linear-gradient(135deg, var(--success), #38a169); color: white; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+    #btn-download { width: 100%; padding: 13px 24px; background: linear-gradient(135deg, var(--success), #38a169); color: white; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
     #btn-download:hover { background: linear-gradient(135deg, #38a169, #2f855a); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(72,187,120,0.3); }
-    #btn-reset { width: 100%; padding: 11px 24px; margin-top: 12px; background: var(--surface); color: var(--text-muted); font-size: 13px; font-weight: 500; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    #btn-reset { width: 100%; padding: 10px 24px; margin-top: 10px; background: var(--surface); color: var(--text-muted); font-size: 13px; font-weight: 500; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
     #btn-reset:hover { background: var(--surface-hover); color: var(--text); }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -121,30 +136,49 @@
   <div class="header-icon">&#x1F4CA;</div>
   <h1>Image to Excel</h1>
   <div class="header-right">
-    <div class="status-dot" id="status-dot"></div>
-    <span class="status-label" id="status-label">Mengecek server...</span>
+    <div class="status-pill" id="status-pill" onclick="toggleTunnel()" title="Klik untuk ubah tunnel URL">
+      <div class="status-dot checking" id="status-dot"></div>
+      <span id="status-label">Mengecek...</span>
+      <span style="font-size:10px;opacity:0.5">&#x2699;&#xFE0F;</span>
+    </div>
   </div>
 </header>
 
 <main class="main">
 
+  <!-- Tunnel Config -->
+  <div id="tunnel-panel">
+    <div class="tunnel-header">
+      <span class="tunnel-icon">&#x1F517;</span>
+      <div>
+        <div class="tunnel-title">URL Tunnel ke Server Lokal</div>
+        <div class="tunnel-desc">Masukkan URL tunnel yang sedang berjalan di komputermu</div>
+      </div>
+    </div>
+    <div class="tunnel-input-row">
+      <input type="text" id="tunnel-url-input" placeholder="https://xxxxx.loca.lt" />
+      <button id="btn-save-tunnel" onclick="saveTunnel()">&#x2714; Simpan &amp; Cek</button>
+    </div>
+    <div class="tunnel-hint">
+      Jalankan di terminal: <code>npx localtunnel --port 5000</code> lalu paste URL-nya di sini.
+      URL disimpan di browser (localStorage).
+    </div>
+  </div>
+
+  <!-- Upload Card -->
   <div class="card" id="upload-card">
     <div class="card-title">Upload Gambar UI</div>
 
-    <div class="alert-banner" id="server-alert" style="display:none;">
-      <span>&#x26A0;&#xFE0F;</span>
-      <div>
-        <strong>Server lokal tidak aktif.</strong>
-        Jalankan <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;">python app.py</code>
-        di komputermu terlebih dahulu.
-      </div>
+    <div id="offline-banner">
+      <strong>&#x26A0;&#xFE0F; Server tidak aktif</strong>
+      Pastikan tunnel berjalan dan URL sudah diisi dengan benar di atas.
     </div>
 
     <div id="drop-zone">
       <span class="drop-icon">&#x1F5BC;&#xFE0F;</span>
       <p class="drop-label">Drag &amp; drop gambar di sini</p>
       <p class="drop-hint">atau <span id="browse-link">pilih file</span> dari komputer</p>
-      <p class="drop-hint" style="margin-top:8px">PNG, JPG &mdash; maks. 20 MB</p>
+      <p class="drop-hint" style="margin-top:7px">PNG, JPG &mdash; maks. 20 MB</p>
     </div>
 
     <div id="file-preview">
@@ -153,7 +187,7 @@
         <div id="preview-name">&mdash;</div>
         <div id="preview-size">&mdash;</div>
       </div>
-      <button id="preview-remove" title="Hapus file">&#x2715;</button>
+      <button id="preview-remove" title="Hapus">&#x2715;</button>
     </div>
 
     <input type="file" id="file-input" accept=".png,.jpg,.jpeg" />
@@ -173,6 +207,7 @@
     </button>
   </div>
 
+  <!-- Progress Card -->
   <div class="card" id="progress-card">
     <div class="card-title">Progress</div>
     <div class="steps">
@@ -206,22 +241,23 @@
       </div>
     </div>
     <div class="log-toggle" id="log-toggle">
-      <span>&#x1F4CB; Lihat log output</span>
+      <span>&#x1F4CB; Lihat log</span>
       <span class="chevron">&#x25B2;</span>
     </div>
     <div id="log-box"></div>
     <div class="error-banner" id="error-banner" style="display:none;">
-      <span class="error-banner-icon">&#x26A0;&#xFE0F;</span>
+      <span>&#x26A0;&#xFE0F;</span>
       <span class="error-banner-text" id="error-message">Terjadi kesalahan.</span>
     </div>
   </div>
 
+  <!-- Download Card -->
   <div class="card" id="download-card">
     <div class="success-banner">
-      <span class="success-icon">&#x1F389;</span>
+      <span style="font-size:30px">&#x1F389;</span>
       <div class="success-text">
         <h3>Excel berhasil digenerate!</h3>
-        <p id="download-filename">File siap untuk didownload</p>
+        <p id="download-filename">File siap didownload</p>
       </div>
     </div>
     <button id="btn-download">
@@ -234,44 +270,83 @@
 </main>
 
 <script>
-  // ─── Config ───────────────────────────────────────────────────────────────
-  var API_BASE = 'https://image-to-excel-api.loca.lt';
-  // bypass-tunnel-reminder wajib di semua request agar localtunnel tidak redirect
+  // ─── Tunnel URL (configurable, saved in localStorage) ─────────────────────
+  var LS_KEY = 'imgxl_tunnel_url';
   var TH = { 'bypass-tunnel-reminder': 'true' };
+
+  function getApiBase() {
+    return (localStorage.getItem(LS_KEY) || '').replace(/\/$/, '');
+  }
+  function setApiBase(url) {
+    localStorage.setItem(LS_KEY, url.replace(/\/$/, ''));
+  }
 
   // ─── State ────────────────────────────────────────────────────────────────
   var selectedFile = null, currentJobId = null, serverDownloadName = null, serverOnline = false;
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
   var $ = function(id){ return document.getElementById(id); };
-  var dropZone = $('drop-zone'), fileInput = $('file-input'), browseLink = $('browse-link');
-  var filePreview = $('file-preview'), previewThumb = $('preview-thumb');
-  var previewName = $('preview-name'), previewSize = $('preview-size'), previewRemove = $('preview-remove');
-  var btnGenerate = $('btn-generate'), outputNameEl = $('output-name');
-  var serverAlert = $('server-alert'), statusDot = $('status-dot'), statusLabel = $('status-label');
-  var uploadCard = $('upload-card'), progressCard = $('progress-card'), downloadCard = $('download-card');
-  var logToggle = $('log-toggle'), logBox = $('log-box');
-  var errorBanner = $('error-banner'), errorMessage = $('error-message');
-  var btnDownload = $('btn-download'), btnReset = $('btn-reset'), downloadFilename = $('download-filename');
+  var dropZone=$('drop-zone'), fileInput=$('file-input'), browseLink=$('browse-link');
+  var filePreview=$('file-preview'), previewThumb=$('preview-thumb');
+  var previewName=$('preview-name'), previewSize=$('preview-size'), previewRemove=$('preview-remove');
+  var btnGenerate=$('btn-generate'), outputNameEl=$('output-name');
+  var offlineBanner=$('offline-banner'), statusDot=$('status-dot'), statusLabel=$('status-label');
+  var tunnelPanel=$('tunnel-panel'), tunnelInput=$('tunnel-url-input');
+  var uploadCard=$('upload-card'), progressCard=$('progress-card'), downloadCard=$('download-card');
+  var logToggle=$('log-toggle'), logBox=$('log-box');
+  var errorBanner=$('error-banner'), errorMessage=$('error-message');
+  var btnDownload=$('btn-download'), btnReset=$('btn-reset'), downloadFilename=$('download-filename');
+
+  // ─── Init tunnel panel ────────────────────────────────────────────────────
+  var savedUrl = getApiBase();
+  if (savedUrl) {
+    tunnelInput.value = savedUrl;
+    tunnelPanel.style.display = 'none'; // hide if URL already saved
+  }
+
+  function toggleTunnel() {
+    tunnelPanel.style.display = tunnelPanel.style.display === 'none' ? 'block' : 'none';
+    if (tunnelPanel.style.display === 'block') tunnelInput.focus();
+  }
+
+  function saveTunnel() {
+    var url = tunnelInput.value.trim();
+    if (!url) { alert('Masukkan URL tunnel terlebih dahulu'); return; }
+    if (!url.startsWith('http')) url = 'https://' + url;
+    setApiBase(url);
+    tunnelInput.value = url;
+    tunnelPanel.style.display = 'none';
+    checkHealth();
+  }
+
+  tunnelInput.addEventListener('keydown', function(e){ if(e.key==='Enter') saveTunnel(); });
 
   // ─── Health Check ─────────────────────────────────────────────────────────
   function checkHealth() {
-    fetch(API_BASE + '/health', { headers: TH, signal: AbortSignal.timeout(5000) })
-      .then(function(r){ setOnline(r.ok); }).catch(function(){ setOnline(false); });
+    var base = getApiBase();
+    if (!base) { setOnline(false); tunnelPanel.style.display = 'block'; return; }
+    statusDot.className = 'status-dot checking';
+    statusLabel.textContent = 'Mengecek...';
+    fetch(base + '/health', { headers: TH, signal: AbortSignal.timeout(6000) })
+      .then(function(r){ setOnline(r.ok); })
+      .catch(function(){ setOnline(false); });
   }
+
   function setOnline(ok) {
     serverOnline = ok;
     statusDot.className = 'status-dot ' + (ok ? 'online' : 'offline');
-    statusLabel.textContent = ok ? 'Server aktif' : 'Server tidak aktif';
-    serverAlert.style.display = ok ? 'none' : 'flex';
+    statusLabel.textContent = ok ? 'Server aktif' : 'Tidak aktif';
+    offlineBanner.style.display = ok ? 'none' : 'block';
+    if (!ok) tunnelPanel.style.display = 'block';
     btnGenerate.disabled = !selectedFile || !ok;
   }
-  checkHealth();
-  setInterval(checkHealth, 15000);
 
-  // ─── File pick ────────────────────────────────────────────────────────────
+  checkHealth();
+  setInterval(checkHealth, 20000);
+
+  // ─── File Selection ───────────────────────────────────────────────────────
   browseLink.onclick = function(){ fileInput.click(); };
-  dropZone.onclick = function(e){ if(e.target !== browseLink) fileInput.click(); };
+  dropZone.onclick = function(e){ if(e.target!==browseLink) fileInput.click(); };
   fileInput.onchange = function(){ if(fileInput.files[0]) pickFile(fileInput.files[0]); };
   dropZone.ondragover = function(e){ e.preventDefault(); dropZone.classList.add('drag-over'); };
   dropZone.ondragleave = function(){ dropZone.classList.remove('drag-over'); };
@@ -280,146 +355,109 @@
 
   function pickFile(f) {
     if(['image/png','image/jpeg','image/jpg'].indexOf(f.type)<0){ alert('Hanya PNG/JPG'); return; }
-    selectedFile = f;
-    previewName.textContent = f.name;
-    previewSize.textContent = fmtBytes(f.size);
-    var r = new FileReader(); r.onload = function(e){ previewThumb.src = e.target.result; }; r.readAsDataURL(f);
-    filePreview.classList.add('show');
-    btnGenerate.disabled = !serverOnline;
+    selectedFile=f; previewName.textContent=f.name; previewSize.textContent=fmtBytes(f.size);
+    var r=new FileReader(); r.onload=function(e){ previewThumb.src=e.target.result; }; r.readAsDataURL(f);
+    filePreview.classList.add('show'); btnGenerate.disabled=!serverOnline;
   }
   function clearFile() {
-    selectedFile = null; fileInput.value = '';
-    filePreview.classList.remove('show'); previewThumb.src = '';
-    outputNameEl.value = ''; btnGenerate.disabled = true;
+    selectedFile=null; fileInput.value=''; filePreview.classList.remove('show');
+    previewThumb.src=''; outputNameEl.value=''; btnGenerate.disabled=true;
   }
   function fmtBytes(b){ if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
 
   // ─── Log ──────────────────────────────────────────────────────────────────
-  logToggle.onclick = function(){ logToggle.classList.toggle('open'); logBox.classList.toggle('show'); };
-  function log(txt, cls) {
-    var s = document.createElement('span'); s.className = 'log-line'+(cls?' '+cls:''); s.textContent = txt;
-    logBox.appendChild(s); logBox.scrollTop = logBox.scrollHeight;
-  }
+  logToggle.onclick=function(){ logToggle.classList.toggle('open'); logBox.classList.toggle('show'); };
+  function log(txt,cls){ var s=document.createElement('span'); s.className='log-line'+(cls?' '+cls:''); s.textContent=txt; logBox.appendChild(s); logBox.scrollTop=logBox.scrollHeight; }
 
   // ─── Steps ────────────────────────────────────────────────────────────────
-  var STEPS = ['upload','analyze','generate','done'];
-  var ICONS = { upload:'&#x1F4E4;', analyze:'&#x1F50D;', generate:'&#x2728;', done:'&#x2705;' };
-  function step(name, state) {
-    var el = $('step-'+name); el.className = 'step '+state;
-    var ic = el.querySelector('.step-icon');
+  var STEPS=['upload','analyze','generate','done'];
+  var ICONS={ upload:'&#x1F4E4;', analyze:'&#x1F50D;', generate:'&#x2728;', done:'&#x2705;' };
+  function step(name,state){
+    var el=$('step-'+name); el.className='step '+state;
+    var ic=el.querySelector('.step-icon');
     if(state==='active') ic.innerHTML='<div class="spinner"></div>';
     else if(state==='done') ic.textContent='\u2713';
     else if(state==='error') ic.textContent='\u2715';
-    else ic.innerHTML = ICONS[name];
+    else ic.innerHTML=ICONS[name];
   }
-  function resetSteps() { STEPS.forEach(function(s){ var el=$('step-'+s); el.className='step'; el.querySelector('.step-icon').innerHTML=ICONS[s]; }); }
+  function resetSteps(){ STEPS.forEach(function(s){ var el=$('step-'+s); el.className='step'; el.querySelector('.step-icon').innerHTML=ICONS[s]; }); }
 
   // ─── Generate ─────────────────────────────────────────────────────────────
-  btnGenerate.onclick = function() {
+  btnGenerate.onclick=function(){
     if(!selectedFile||!serverOnline) return;
-    uploadCard.style.display = 'none';
-    progressCard.classList.add('show'); downloadCard.classList.remove('show');
+    var base=getApiBase(); if(!base) return;
+    uploadCard.style.display='none'; progressCard.classList.add('show'); downloadCard.classList.remove('show');
     logBox.innerHTML=''; logBox.classList.remove('show'); logToggle.classList.remove('open');
-    errorBanner.style.display='none';
-    progressCard.querySelectorAll('.reset-btn').forEach(function(b){ b.remove(); });
+    errorBanner.style.display='none'; progressCard.querySelectorAll('.reset-btn').forEach(function(b){ b.remove(); });
     resetSteps(); step('upload','active');
 
-    var fd = new FormData(); fd.append('image', selectedFile);
-    var nm = outputNameEl.value.trim(); if(nm) fd.append('output_name', nm);
+    var fd=new FormData(); fd.append('image',selectedFile);
+    var nm=outputNameEl.value.trim(); if(nm) fd.append('output_name',nm);
 
-    fetch(API_BASE+'/upload', { method:'POST', body:fd, headers:TH })
+    fetch(base+'/upload', { method:'POST', body:fd, headers:TH })
       .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
       .then(function(x){
         if(!x.ok) throw new Error(x.d.error||'Upload gagal');
-        currentJobId = x.d.job_id; serverDownloadName = x.d.download_name;
-        step('upload','done'); step('analyze','active');
-        log('[*] Upload selesai. Mulai analisis...','info');
+        currentJobId=x.d.job_id; serverDownloadName=x.d.download_name;
+        step('upload','done'); step('analyze','active'); log('[*] Upload selesai. Mulai analisis...','info');
         stream(currentJobId);
       })
       .catch(function(e){ step('upload','error'); showErr('Upload gagal: '+e.message); });
   };
 
-  // ─── Fetch-based SSE (bypass header support) ──────────────────────────────
-  function stream(jobId) {
-    var buf='', ev='', da='';
-    fetch(API_BASE+'/stream/'+jobId, { headers:TH })
+  // ─── Fetch-based SSE ──────────────────────────────────────────────────────
+  function stream(jobId){
+    var base=getApiBase(), buf='', ev='', da='';
+    fetch(base+'/stream/'+jobId, { headers:TH })
       .then(function(r){
         if(!r.ok) throw new Error('Stream error '+r.status);
-        var reader = r.body.getReader(), dec = new TextDecoder();
+        var reader=r.body.getReader(), dec=new TextDecoder();
         function pump(){
           return reader.read().then(function(res){
             if(res.done) return;
-            buf += dec.decode(res.value, {stream:true});
-            var lines = buf.split('\n'); buf = lines.pop();
+            buf+=dec.decode(res.value,{stream:true});
+            var lines=buf.split('\n'); buf=lines.pop();
             lines.forEach(function(ln){
               if(ln.startsWith('event: ')){ ev=ln.slice(7).trim(); }
               else if(ln.startsWith('data: ')){ da=ln.slice(6); }
-              else if(ln===''){
-                onSSE(jobId,ev,da); ev=''; da='';
-              }
+              else if(ln===''){ onSSE(jobId,ev,da); ev=''; da=''; }
             });
             return pump();
           });
         }
         return pump();
       })
-      .catch(function(e){
-        step('generate','error'); step('done','error');
-        log('[-] '+e.message,'error'); showErr('Koneksi terputus: '+e.message);
-        if(!logBox.classList.contains('show')){ logToggle.classList.add('open'); logBox.classList.add('show'); }
-      });
+      .catch(function(e){ step('generate','error'); step('done','error'); log('[-] '+e.message,'error'); showErr('Koneksi terputus: '+e.message); if(!logBox.classList.contains('show')){ logToggle.classList.add('open'); logBox.classList.add('show'); } });
   }
 
-  function onSSE(jobId, ev, da) {
+  function onSSE(jobId,ev,da){
     if(ev==='log'){
       log(da);
       if(da.indexOf('JSON layout extracted')>-1){ step('analyze','done'); step('generate','active'); }
       if(da.indexOf('Running temp_generate')>-1){ $('step-generate-desc').textContent='Mengeksekusi script Excel...'; }
-    } else if(ev==='done'){
-      step('generate','done'); step('done','done'); log('[+] '+da,'success'); showDl(jobId, serverDownloadName);
-    } else if(ev==='error'){
-      step('generate','error'); step('done','error'); log('[-] '+da,'error'); showErr(da);
-      if(!logBox.classList.contains('show')){ logToggle.classList.add('open'); logBox.classList.add('show'); }
-    }
+    } else if(ev==='done'){ step('generate','done'); step('done','done'); log('[+] '+da,'success'); showDl(jobId,serverDownloadName); }
+    else if(ev==='error'){ step('generate','error'); step('done','error'); log('[-] '+da,'error'); showErr(da); if(!logBox.classList.contains('show')){ logToggle.classList.add('open'); logBox.classList.add('show'); } }
   }
 
-  // ─── Error ────────────────────────────────────────────────────────────────
-  function showErr(msg) {
-    errorMessage.textContent = msg; errorBanner.style.display = 'flex';
-    if(!progressCard.querySelector('.reset-btn')){
-      var b=document.createElement('button'); b.className='reset-btn'; b.textContent='\u21A9 Coba lagi';
-      b.style.cssText='width:100%;padding:11px 24px;margin-top:16px;background:var(--surface);color:var(--text-muted);font-size:13px;font-weight:500;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;';
-      b.onclick=reset; progressCard.appendChild(b);
-    }
-  }
+  function showErr(msg){ errorMessage.textContent=msg; errorBanner.style.display='flex'; if(!progressCard.querySelector('.reset-btn')){ var b=document.createElement('button'); b.className='reset-btn'; b.textContent='\u21A9 Coba lagi'; b.style.cssText='width:100%;padding:10px 24px;margin-top:14px;background:var(--surface);color:var(--text-muted);font-size:13px;font-weight:500;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;'; b.onclick=reset; progressCard.appendChild(b); } }
 
   // ─── Download ─────────────────────────────────────────────────────────────
-  function showDl(jobId, dlName) {
-    dlName = dlName||'output.xlsx'; downloadFilename.textContent = dlName;
-    btnDownload.onclick = function(e){
+  function showDl(jobId,dlName){
+    dlName=dlName||'output.xlsx'; downloadFilename.textContent=dlName;
+    var base=getApiBase();
+    btnDownload.onclick=function(e){
       e.preventDefault();
-      // fetch+blob: blob URL is same-origin (Vercel), so a.download works correctly
-      fetch(API_BASE+'/download/'+jobId, { headers:TH })
+      fetch(base+'/download/'+jobId, { headers:TH })
         .then(function(r){ if(!r.ok) throw new Error('Download gagal'); return r.blob(); })
-        .then(function(b){
-          var url=URL.createObjectURL(b), a=document.createElement('a');
-          a.href=url; a.download=dlName; document.body.appendChild(a); a.click();
-          document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
-        })
+        .then(function(b){ var url=URL.createObjectURL(b), a=document.createElement('a'); a.href=url; a.download=dlName; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); },2000); })
         .catch(function(e){ alert('Download gagal: '+e.message); });
     };
-    setTimeout(function(){ progressCard.classList.remove('show'); downloadCard.classList.add('show'); }, 600);
+    setTimeout(function(){ progressCard.classList.remove('show'); downloadCard.classList.add('show'); },600);
   }
 
   // ─── Reset ────────────────────────────────────────────────────────────────
-  btnReset.onclick = reset;
-  function reset() {
-    progressCard.querySelectorAll('.reset-btn').forEach(function(b){ b.remove(); });
-    currentJobId=null; serverDownloadName=null; clearFile();
-    uploadCard.style.display=''; progressCard.classList.remove('show'); downloadCard.classList.remove('show');
-    logBox.innerHTML=''; errorBanner.style.display='none';
-    resetSteps(); $('step-generate-desc').textContent='Membuat script openpyxl dan mengeksekusinya';
-  }
+  btnReset.onclick=reset;
+  function reset(){ progressCard.querySelectorAll('.reset-btn').forEach(function(b){ b.remove(); }); currentJobId=null; serverDownloadName=null; clearFile(); uploadCard.style.display=''; progressCard.classList.remove('show'); downloadCard.classList.remove('show'); logBox.innerHTML=''; errorBanner.style.display='none'; resetSteps(); $('step-generate-desc').textContent='Membuat script openpyxl dan mengeksekusinya'; }
 </script>
 
 </body>

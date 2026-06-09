@@ -33,7 +33,7 @@ def _cors_headers(response):
     """Tambahkan CORS headers agar Vercel frontend bisa akses local API."""
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, bypass-tunnel-reminder"
     response.headers["Access-Control-Max-Age"] = "3600"
     return response
 
