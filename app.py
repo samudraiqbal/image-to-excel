@@ -43,10 +43,10 @@ def add_cors(response):
     return _cors_headers(response)
 
 
-@app.route("/v1/", methods=["OPTIONS"])
-@app.route("/v1/<path:path>", methods=["OPTIONS"])
+@app.route("/", defaults={"path": ""}, methods=["OPTIONS"])
+@app.route("/<path:path>", methods=["OPTIONS"])
 def handle_options(path=""):
-    """Handle CORS preflight OPTIONS request."""
+    """Handle CORS preflight OPTIONS request untuk semua route."""
     resp = make_response("", 204)
     return _cors_headers(resp)
 
