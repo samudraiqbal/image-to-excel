@@ -1,0 +1,8 @@
+*.xlsx
+*.png
+__pycache__/
+*.pyc
+temp_generate.py
+get-pip.py
+.gitignore
+.env
