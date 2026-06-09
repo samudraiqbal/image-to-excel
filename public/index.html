@@ -9,40 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0a0e1a;
-      --bg2: #0f1525;
-      --surface: rgba(255,255,255,0.04);
-      --surface-hover: rgba(255,255,255,0.07);
-      --border: rgba(255,255,255,0.08);
-      --border-active: rgba(99,179,237,0.5);
-      --accent: #63b3ed;
-      --accent2: #7c3aed;
-      --accent-glow: rgba(99,179,237,0.15);
-      --success: #48bb78;
-      --success-glow: rgba(72,187,120,0.15);
-      --error: #fc8181;
-      --error-glow: rgba(252,129,129,0.15);
-      --text: #e2e8f0;
-      --text-muted: #718096;
-      --text-dim: #4a5568;
+      --bg: #0a0e1a; --bg2: #0f1525;
+      --surface: rgba(255,255,255,0.04); --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08); --border-active: rgba(99,179,237,0.5);
+      --accent: #63b3ed; --accent2: #7c3aed; --accent-glow: rgba(99,179,237,0.15);
+      --success: #48bb78; --success-glow: rgba(72,187,120,0.15);
+      --error: #fc8181; --error-glow: rgba(252,129,129,0.15);
+      --text: #e2e8f0; --text-muted: #718096; --text-dim: #4a5568;
     }
-
     html, body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
-
     body {
-      background-image:
-        radial-gradient(ellipse at 20% 20%, rgba(99,179,237,0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.06) 0%, transparent 50%);
+      background-image: radial-gradient(ellipse at 20% 20%, rgba(99,179,237,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.06) 0%, transparent 50%);
       display: flex; flex-direction: column; min-height: 100vh;
     }
-
-    .header {
-      padding: 20px 40px; display: flex; align-items: center; gap: 12px;
-      border-bottom: 1px solid var(--border); background: rgba(10,14,26,0.8);
-      backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10;
-    }
+    .header { padding: 20px 40px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); background: rgba(10,14,26,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; }
     .header-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
@@ -50,22 +31,11 @@
     .status-dot.online { background: var(--success); box-shadow: 0 0 0 3px rgba(72,187,120,0.2); }
     .status-dot.offline { background: var(--error); }
     .status-label { font-size: 12px; color: var(--text-muted); }
-
     .main { flex: 1; padding: 48px 40px; max-width: 840px; margin: 0 auto; width: 100%; }
-
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
     .card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 20px; }
-
-    /* Alert Banner */
-    .alert-banner {
-      display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px;
-      background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2);
-      border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: var(--text-muted);
-    }
-    .alert-banner.offline { background: var(--error-glow); border-color: rgba(252,129,129,0.25); color: var(--error); }
+    .alert-banner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: var(--text-muted); }
     .alert-banner strong { color: var(--text); }
-
-    /* Drop Zone */
     #drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden; }
     #drop-zone::before { content: ''; position: absolute; inset: 0; background: var(--accent-glow); opacity: 0; transition: opacity 0.25s; }
     #drop-zone:hover, #drop-zone.drag-over { border-color: var(--border-active); background: var(--surface-hover); }
@@ -76,8 +46,6 @@
     .drop-label { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
     .drop-hint { font-size: 12px; color: var(--text-muted); }
     .drop-hint span { color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-
-    /* File Preview */
     #file-preview { display: none; margin-top: 16px; padding: 14px 16px; background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 10px; align-items: center; gap: 12px; }
     #file-preview.show { display: flex; }
     #preview-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
@@ -87,8 +55,6 @@
     #preview-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 4px; line-height: 1; transition: color 0.2s; }
     #preview-remove:hover { color: var(--error); }
     #file-input { display: none; }
-
-    /* Output Name Input */
     .input-group { margin-top: 16px; }
     .input-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; letter-spacing: 0.03em; }
     .input-row { display: flex; align-items: center; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
@@ -98,21 +64,9 @@
     .input-suffix { border-left: 1px solid var(--border); }
     #output-name { flex: 1; background: transparent; border: none; outline: none; padding: 10px 12px; font-size: 13px; color: var(--text); font-family: inherit; }
     #output-name::placeholder { color: var(--text-dim); }
-
-    /* Generate Button */
-    #btn-generate {
-      width: 100%; padding: 14px 24px; margin-top: 16px;
-      background: linear-gradient(135deg, var(--accent), #4299e1);
-      color: white; font-size: 14px; font-weight: 600; border: none;
-      border-radius: 10px; cursor: pointer; transition: all 0.2s ease;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      letter-spacing: 0.02em; font-family: inherit;
-    }
+    #btn-generate { width: 100%; padding: 14px 24px; margin-top: 16px; background: linear-gradient(135deg, var(--accent), #4299e1); color: white; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.02em; font-family: inherit; }
     #btn-generate:hover:not(:disabled) { background: linear-gradient(135deg, #4299e1, #3182ce); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,179,237,0.3); }
-    #btn-generate:active:not(:disabled) { transform: translateY(0); }
-    #btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    /* Progress */
+    #btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
     #progress-card { display: none; }
     #progress-card.show { display: block; }
     .steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
@@ -121,11 +75,11 @@
     .step.done:not(:last-child)::after { background: var(--success); }
     .step.active:not(:last-child)::after { background: var(--accent); }
     .step-icon { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; transition: all 0.3s ease; position: relative; z-index: 1; }
-    .step.active .step-icon { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
-    .step.done .step-icon { border-color: var(--success); background: var(--success-glow); color: var(--success); }
-    .step.error .step-icon { border-color: var(--error); background: var(--error-glow); color: var(--error); }
+    .step.active .step-icon { border-color: var(--accent); background: var(--accent-glow); }
+    .step.done .step-icon { border-color: var(--success); background: var(--success-glow); }
+    .step.error .step-icon { border-color: var(--error); background: var(--error-glow); }
     .step-body { flex: 1; }
-    .step-title { font-weight: 500; font-size: 13px; transition: color 0.3s; }
+    .step-title { font-weight: 500; font-size: 13px; }
     .step.active .step-title { color: var(--accent); }
     .step.done .step-title { color: var(--success); }
     .step.error .step-title { color: var(--error); }
@@ -134,24 +88,19 @@
     .spinner { width: 14px; height: 14px; border: 2px solid rgba(99,179,237,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(99,179,237,0.4); } 70% { box-shadow: 0 0 0 8px rgba(99,179,237,0); } 100% { box-shadow: 0 0 0 0 rgba(99,179,237,0); } }
     .step.active .step-icon { animation: pulse-ring 1.5s ease-out infinite; }
-
-    /* Log */
     .log-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; padding: 8px 0; border-top: 1px solid var(--border); user-select: none; margin-top: 8px; }
     .log-toggle:hover { color: var(--text); }
     .log-toggle .chevron { transition: transform 0.2s; font-size: 10px; }
     .log-toggle.open .chevron { transform: rotate(180deg); }
     #log-box { display: none; margin-top: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'Courier New', monospace; font-size: 11px; color: #a0aec0; max-height: 200px; overflow-y: auto; line-height: 1.8; }
     #log-box.show { display: block; }
-    #log-box .log-line { display: block; }
-    #log-box .log-line.success { color: var(--success); }
-    #log-box .log-line.error { color: var(--error); }
-    #log-box .log-line.info { color: var(--accent); }
-
+    .log-line { display: block; }
+    .log-line.success { color: var(--success); }
+    .log-line.error { color: var(--error); }
+    .log-line.info { color: var(--accent); }
     .error-banner { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px; background: var(--error-glow); border: 1px solid rgba(252,129,129,0.25); border-radius: 12px; margin-top: 16px; }
-    .error-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .error-banner-icon { font-size: 20px; flex-shrink: 0; }
     .error-banner-text { font-size: 13px; color: var(--error); }
-
-    /* Download */
     #download-card { display: none; }
     #download-card.show { display: block; }
     .success-banner { display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: var(--success-glow); border: 1px solid rgba(72,187,120,0.25); border-radius: 12px; margin-bottom: 20px; }
@@ -160,11 +109,9 @@
     .success-text p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     #btn-download { width: 100%; padding: 14px 24px; background: linear-gradient(135deg, var(--success), #38a169); color: white; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
     #btn-download:hover { background: linear-gradient(135deg, #38a169, #2f855a); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(72,187,120,0.3); }
-    #btn-reset { width: 100%; padding: 11px 24px; margin-top: 12px; background: var(--surface); color: var(--text-muted); font-size: 13px; font-weight: 500; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+    #btn-reset { width: 100%; padding: 11px 24px; margin-top: 12px; background: var(--surface); color: var(--text-muted); font-size: 13px; font-weight: 500; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
     #btn-reset:hover { background: var(--surface-hover); color: var(--text); }
-
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   </style>
 </head>
@@ -181,7 +128,6 @@
 
 <main class="main">
 
-  <!-- Upload Card -->
   <div class="card" id="upload-card">
     <div class="card-title">Upload Gambar UI</div>
 
@@ -227,7 +173,6 @@
     </button>
   </div>
 
-  <!-- Progress Card -->
   <div class="card" id="progress-card">
     <div class="card-title">Progress</div>
     <div class="steps">
@@ -271,7 +216,6 @@
     </div>
   </div>
 
-  <!-- Download Card -->
   <div class="card" id="download-card">
     <div class="success-banner">
       <span class="success-icon">&#x1F389;</span>
@@ -290,226 +234,191 @@
 </main>
 
 <script>
-  // ─── API Base URL ─────────────────────────────────────────────────────────
-  // Tunnel URL yang expose Flask lokal ke internet
-  var API_BASE = 'https://r3huyik.abc-tunnel.us/v1';
+  // ─── Config ───────────────────────────────────────────────────────────────
+  var API_BASE = 'https://image-to-excel-api.loca.lt';
+  // bypass-tunnel-reminder wajib di semua request agar localtunnel tidak redirect
+  var TH = { 'bypass-tunnel-reminder': 'true' };
 
   // ─── State ────────────────────────────────────────────────────────────────
-  var selectedFile = null;
-  var currentJobId = null;
-  var serverDownloadName = null;
-  var serverOnline = false;
+  var selectedFile = null, currentJobId = null, serverDownloadName = null, serverOnline = false;
 
-  // ─── Elements ─────────────────────────────────────────────────────────────
-  var dropZone      = document.getElementById('drop-zone');
-  var fileInput     = document.getElementById('file-input');
-  var browseLink    = document.getElementById('browse-link');
-  var filePreview   = document.getElementById('file-preview');
-  var previewThumb  = document.getElementById('preview-thumb');
-  var previewName   = document.getElementById('preview-name');
-  var previewSize   = document.getElementById('preview-size');
-  var previewRemove = document.getElementById('preview-remove');
-  var btnGenerate   = document.getElementById('btn-generate');
-  var outputNameEl  = document.getElementById('output-name');
-  var serverAlert   = document.getElementById('server-alert');
-  var statusDot     = document.getElementById('status-dot');
-  var statusLabel   = document.getElementById('status-label');
-  var uploadCard    = document.getElementById('upload-card');
-  var progressCard  = document.getElementById('progress-card');
-  var downloadCard  = document.getElementById('download-card');
-  var logToggle     = document.getElementById('log-toggle');
-  var logBox        = document.getElementById('log-box');
-  var errorBanner   = document.getElementById('error-banner');
-  var errorMessage  = document.getElementById('error-message');
-  var btnDownload   = document.getElementById('btn-download');
-  var btnReset      = document.getElementById('btn-reset');
-  var downloadFilename = document.getElementById('download-filename');
+  // ─── DOM refs ─────────────────────────────────────────────────────────────
+  var $ = function(id){ return document.getElementById(id); };
+  var dropZone = $('drop-zone'), fileInput = $('file-input'), browseLink = $('browse-link');
+  var filePreview = $('file-preview'), previewThumb = $('preview-thumb');
+  var previewName = $('preview-name'), previewSize = $('preview-size'), previewRemove = $('preview-remove');
+  var btnGenerate = $('btn-generate'), outputNameEl = $('output-name');
+  var serverAlert = $('server-alert'), statusDot = $('status-dot'), statusLabel = $('status-label');
+  var uploadCard = $('upload-card'), progressCard = $('progress-card'), downloadCard = $('download-card');
+  var logToggle = $('log-toggle'), logBox = $('log-box');
+  var errorBanner = $('error-banner'), errorMessage = $('error-message');
+  var btnDownload = $('btn-download'), btnReset = $('btn-reset'), downloadFilename = $('download-filename');
 
-  // ─── Server Health Check ─────────────────────────────────────────────────
-  function checkServerHealth() {
-    fetch(API_BASE + '/health', { method: 'GET', signal: AbortSignal.timeout(5000) })
-      .then(function(res) { setServerStatus(res.ok); })
-      .catch(function() { setServerStatus(false); });
+  // ─── Health Check ─────────────────────────────────────────────────────────
+  function checkHealth() {
+    fetch(API_BASE + '/health', { headers: TH, signal: AbortSignal.timeout(5000) })
+      .then(function(r){ setOnline(r.ok); }).catch(function(){ setOnline(false); });
   }
-
-  function setServerStatus(online) {
-    serverOnline = online;
-    if (online) {
-      statusDot.className = 'status-dot online';
-      statusLabel.textContent = 'Server aktif';
-      serverAlert.style.display = 'none';
-    } else {
-      statusDot.className = 'status-dot offline';
-      statusLabel.textContent = 'Server tidak aktif';
-      serverAlert.style.display = 'flex';
-    }
-    updateGenerateButton();
+  function setOnline(ok) {
+    serverOnline = ok;
+    statusDot.className = 'status-dot ' + (ok ? 'online' : 'offline');
+    statusLabel.textContent = ok ? 'Server aktif' : 'Server tidak aktif';
+    serverAlert.style.display = ok ? 'none' : 'flex';
+    btnGenerate.disabled = !selectedFile || !ok;
   }
+  checkHealth();
+  setInterval(checkHealth, 15000);
 
-  function updateGenerateButton() {
-    btnGenerate.disabled = !selectedFile || !serverOnline;
-  }
+  // ─── File pick ────────────────────────────────────────────────────────────
+  browseLink.onclick = function(){ fileInput.click(); };
+  dropZone.onclick = function(e){ if(e.target !== browseLink) fileInput.click(); };
+  fileInput.onchange = function(){ if(fileInput.files[0]) pickFile(fileInput.files[0]); };
+  dropZone.ondragover = function(e){ e.preventDefault(); dropZone.classList.add('drag-over'); };
+  dropZone.ondragleave = function(){ dropZone.classList.remove('drag-over'); };
+  dropZone.ondrop = function(e){ e.preventDefault(); dropZone.classList.remove('drag-over'); var f=e.dataTransfer.files[0]; if(f) pickFile(f); };
+  previewRemove.onclick = function(e){ e.stopPropagation(); clearFile(); };
 
-  // Cek setiap 15 detik
-  checkServerHealth();
-  setInterval(checkServerHealth, 15000);
-
-  // ─── File Selection ───────────────────────────────────────────────────────
-  browseLink.addEventListener('click', function(){ fileInput.click(); });
-  dropZone.addEventListener('click', function(e){ if (e.target !== browseLink) fileInput.click(); });
-  fileInput.addEventListener('change', function(){ if (fileInput.files[0]) setFile(fileInput.files[0]); });
-  dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('drag-over'); });
-  dropZone.addEventListener('drop', function(e){
-    e.preventDefault(); dropZone.classList.remove('drag-over');
-    var f = e.dataTransfer.files[0]; if (f) setFile(f);
-  });
-  previewRemove.addEventListener('click', function(e){ e.stopPropagation(); clearFile(); });
-
-  function setFile(file) {
-    var allowed = ['image/png', 'image/jpeg', 'image/jpg'];
-    if (allowed.indexOf(file.type) === -1) { alert('Hanya file PNG atau JPG yang diizinkan.'); return; }
-    selectedFile = file;
-    previewName.textContent = file.name;
-    previewSize.textContent = formatBytes(file.size);
-    var reader = new FileReader();
-    reader.onload = function(e){ previewThumb.src = e.target.result; };
-    reader.readAsDataURL(file);
+  function pickFile(f) {
+    if(['image/png','image/jpeg','image/jpg'].indexOf(f.type)<0){ alert('Hanya PNG/JPG'); return; }
+    selectedFile = f;
+    previewName.textContent = f.name;
+    previewSize.textContent = fmtBytes(f.size);
+    var r = new FileReader(); r.onload = function(e){ previewThumb.src = e.target.result; }; r.readAsDataURL(f);
     filePreview.classList.add('show');
-    updateGenerateButton();
+    btnGenerate.disabled = !serverOnline;
   }
-
   function clearFile() {
     selectedFile = null; fileInput.value = '';
     filePreview.classList.remove('show'); previewThumb.src = '';
-    outputNameEl.value = ''; updateGenerateButton();
+    outputNameEl.value = ''; btnGenerate.disabled = true;
+  }
+  function fmtBytes(b){ if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+
+  // ─── Log ──────────────────────────────────────────────────────────────────
+  logToggle.onclick = function(){ logToggle.classList.toggle('open'); logBox.classList.toggle('show'); };
+  function log(txt, cls) {
+    var s = document.createElement('span'); s.className = 'log-line'+(cls?' '+cls:''); s.textContent = txt;
+    logBox.appendChild(s); logBox.scrollTop = logBox.scrollHeight;
   }
 
-  function formatBytes(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
-    return (b/1048576).toFixed(1) + ' MB';
-  }
-
-  // ─── Log ─────────────────────────────────────────────────────────────────
-  logToggle.addEventListener('click', function(){
-    logToggle.classList.toggle('open'); logBox.classList.toggle('show');
-  });
-  function appendLog(text, type) {
-    var line = document.createElement('span');
-    line.className = 'log-line' + (type ? ' ' + type : '');
-    line.textContent = text; logBox.appendChild(line);
-    logBox.scrollTop = logBox.scrollHeight;
-  }
-
-  // ─── Steps ───────────────────────────────────────────────────────────────
+  // ─── Steps ────────────────────────────────────────────────────────────────
   var STEPS = ['upload','analyze','generate','done'];
-  var STEP_ICONS = { upload:'&#x1F4E4;', analyze:'&#x1F50D;', generate:'&#x2728;', done:'&#x2705;' };
-
-  function setStep(name, state) {
-    var el = document.getElementById('step-' + name);
-    el.classList.remove('active','done','error'); el.classList.add(state);
-    var icon = el.querySelector('.step-icon');
-    if (state === 'active') icon.innerHTML = '<div class="spinner"></div>';
-    else if (state === 'done') icon.textContent = '\u2713';
-    else if (state === 'error') icon.textContent = '\u2715';
+  var ICONS = { upload:'&#x1F4E4;', analyze:'&#x1F50D;', generate:'&#x2728;', done:'&#x2705;' };
+  function step(name, state) {
+    var el = $('step-'+name); el.className = 'step '+state;
+    var ic = el.querySelector('.step-icon');
+    if(state==='active') ic.innerHTML='<div class="spinner"></div>';
+    else if(state==='done') ic.textContent='\u2713';
+    else if(state==='error') ic.textContent='\u2715';
+    else ic.innerHTML = ICONS[name];
   }
+  function resetSteps() { STEPS.forEach(function(s){ var el=$('step-'+s); el.className='step'; el.querySelector('.step-icon').innerHTML=ICONS[s]; }); }
 
   // ─── Generate ─────────────────────────────────────────────────────────────
-  btnGenerate.addEventListener('click', function(){
-    if (!selectedFile || !serverOnline) return;
-
+  btnGenerate.onclick = function() {
+    if(!selectedFile||!serverOnline) return;
     uploadCard.style.display = 'none';
-    progressCard.classList.add('show');
-    downloadCard.classList.remove('show');
-    logBox.innerHTML = ''; logBox.classList.remove('show');
-    logToggle.classList.remove('open'); errorBanner.style.display = 'none';
-    progressCard.querySelectorAll('.reset-in-progress').forEach(function(el){ el.remove(); });
-    STEPS.forEach(function(s){
-      var el = document.getElementById('step-' + s);
-      el.classList.remove('active','done','error');
-      el.querySelector('.step-icon').innerHTML = STEP_ICONS[s];
-    });
+    progressCard.classList.add('show'); downloadCard.classList.remove('show');
+    logBox.innerHTML=''; logBox.classList.remove('show'); logToggle.classList.remove('open');
+    errorBanner.style.display='none';
+    progressCard.querySelectorAll('.reset-btn').forEach(function(b){ b.remove(); });
+    resetSteps(); step('upload','active');
 
-    setStep('upload', 'active');
+    var fd = new FormData(); fd.append('image', selectedFile);
+    var nm = outputNameEl.value.trim(); if(nm) fd.append('output_name', nm);
 
-    var formData = new FormData();
-    formData.append('image', selectedFile);
-    var customName = outputNameEl.value.trim();
-    if (customName) formData.append('output_name', customName);
-
-    fetch(API_BASE + '/upload', { method: 'POST', body: formData })
-      .then(function(res){ return res.json().then(function(d){ return { ok: res.ok, data: d }; }); })
-      .then(function(r){
-        if (!r.ok) throw new Error(r.data.error || 'Upload gagal');
-        currentJobId = r.data.job_id;
-        serverDownloadName = r.data.download_name;
-        setStep('upload','done'); setStep('analyze','active');
-        appendLog('[*] Upload selesai. Mulai analisis gambar...', 'info');
-        startStream(currentJobId);
+    fetch(API_BASE+'/upload', { method:'POST', body:fd, headers:TH })
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+      .then(function(x){
+        if(!x.ok) throw new Error(x.d.error||'Upload gagal');
+        currentJobId = x.d.job_id; serverDownloadName = x.d.download_name;
+        step('upload','done'); step('analyze','active');
+        log('[*] Upload selesai. Mulai analisis...','info');
+        stream(currentJobId);
       })
-      .catch(function(err){
-        setStep('upload','error'); showError('Upload gagal: ' + err.message);
-      });
-  });
+      .catch(function(e){ step('upload','error'); showErr('Upload gagal: '+e.message); });
+  };
 
-  function startStream(jobId) {
-    var sse = new EventSource(API_BASE + '/stream/' + jobId);
-    sse.addEventListener('log', function(e){
-      var msg = e.data; appendLog(msg);
-      if (msg.indexOf('JSON layout extracted') !== -1) { setStep('analyze','done'); setStep('generate','active'); }
-      else if (msg.indexOf('Running temp_generate') !== -1) { document.getElementById('step-generate-desc').textContent = 'Mengeksekusi script Excel...'; }
-    });
-    sse.addEventListener('done', function(e){
-      sse.close(); setStep('generate','done'); setStep('done','done');
-      appendLog('[+] ' + e.data, 'success'); showDownload(jobId, serverDownloadName);
-    });
-    sse.addEventListener('error', function(e){
-      sse.close();
-      var msg = e.data || 'Terjadi kesalahan tidak diketahui.';
-      setStep('generate','error'); setStep('done','error');
-      appendLog('[-] ' + msg, 'error'); showError(msg);
-      if (!logBox.classList.contains('show')) { logToggle.classList.add('open'); logBox.classList.add('show'); }
-    });
-    sse.addEventListener('end', function(){ sse.close(); });
-    sse.onerror = function(){ if (sse.readyState !== EventSource.CLOSED) sse.close(); };
+  // ─── Fetch-based SSE (bypass header support) ──────────────────────────────
+  function stream(jobId) {
+    var buf='', ev='', da='';
+    fetch(API_BASE+'/stream/'+jobId, { headers:TH })
+      .then(function(r){
+        if(!r.ok) throw new Error('Stream error '+r.status);
+        var reader = r.body.getReader(), dec = new TextDecoder();
+        function pump(){
+          return reader.read().then(function(res){
+            if(res.done) return;
+            buf += dec.decode(res.value, {stream:true});
+            var lines = buf.split('\n'); buf = lines.pop();
+            lines.forEach(function(ln){
+              if(ln.startsWith('event: ')){ ev=ln.slice(7).trim(); }
+              else if(ln.startsWith('data: ')){ da=ln.slice(6); }
+              else if(ln===''){
+                onSSE(jobId,ev,da); ev=''; da='';
+              }
+            });
+            return pump();
+          });
+        }
+        return pump();
+      })
+      .catch(function(e){
+        step('generate','error'); step('done','error');
+        log('[-] '+e.message,'error'); showErr('Koneksi terputus: '+e.message);
+        if(!logBox.classList.contains('show')){ logToggle.classList.add('open'); logBox.classList.add('show'); }
+      });
   }
 
-  function showError(msg) {
-    errorMessage.textContent = msg; errorBanner.style.display = 'flex';
-    var existing = progressCard.querySelector('.reset-in-progress');
-    if (!existing) {
-      var btn = document.createElement('button');
-      btn.className = 'reset-in-progress'; btn.textContent = '\u21A9 Coba lagi';
-      btn.style.cssText = 'width:100%;padding:11px 24px;margin-top:16px;background:var(--surface);color:var(--text-muted);font-size:13px;font-weight:500;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;';
-      btn.onclick = resetUI; progressCard.appendChild(btn);
+  function onSSE(jobId, ev, da) {
+    if(ev==='log'){
+      log(da);
+      if(da.indexOf('JSON layout extracted')>-1){ step('analyze','done'); step('generate','active'); }
+      if(da.indexOf('Running temp_generate')>-1){ $('step-generate-desc').textContent='Mengeksekusi script Excel...'; }
+    } else if(ev==='done'){
+      step('generate','done'); step('done','done'); log('[+] '+da,'success'); showDl(jobId, serverDownloadName);
+    } else if(ev==='error'){
+      step('generate','error'); step('done','error'); log('[-] '+da,'error'); showErr(da);
+      if(!logBox.classList.contains('show')){ logToggle.classList.add('open'); logBox.classList.add('show'); }
     }
   }
 
-  function showDownload(jobId, dlName) {
-    dlName = dlName || 'output.xlsx';
-    downloadFilename.textContent = dlName;
+  // ─── Error ────────────────────────────────────────────────────────────────
+  function showErr(msg) {
+    errorMessage.textContent = msg; errorBanner.style.display = 'flex';
+    if(!progressCard.querySelector('.reset-btn')){
+      var b=document.createElement('button'); b.className='reset-btn'; b.textContent='\u21A9 Coba lagi';
+      b.style.cssText='width:100%;padding:11px 24px;margin-top:16px;background:var(--surface);color:var(--text-muted);font-size:13px;font-weight:500;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;';
+      b.onclick=reset; progressCard.appendChild(b);
+    }
+  }
+
+  // ─── Download ─────────────────────────────────────────────────────────────
+  function showDl(jobId, dlName) {
+    dlName = dlName||'output.xlsx'; downloadFilename.textContent = dlName;
     btnDownload.onclick = function(e){
       e.preventDefault();
-      window.location.href = API_BASE + '/download/' + jobId;
+      // fetch+blob: blob URL is same-origin (Vercel), so a.download works correctly
+      fetch(API_BASE+'/download/'+jobId, { headers:TH })
+        .then(function(r){ if(!r.ok) throw new Error('Download gagal'); return r.blob(); })
+        .then(function(b){
+          var url=URL.createObjectURL(b), a=document.createElement('a');
+          a.href=url; a.download=dlName; document.body.appendChild(a); a.click();
+          document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+        })
+        .catch(function(e){ alert('Download gagal: '+e.message); });
     };
-    setTimeout(function(){
-      progressCard.classList.remove('show'); downloadCard.classList.add('show');
-    }, 600);
+    setTimeout(function(){ progressCard.classList.remove('show'); downloadCard.classList.add('show'); }, 600);
   }
 
   // ─── Reset ────────────────────────────────────────────────────────────────
-  btnReset.addEventListener('click', resetUI);
-  function resetUI() {
-    progressCard.querySelectorAll('.reset-in-progress').forEach(function(el){ el.remove(); });
-    currentJobId = null; serverDownloadName = null; clearFile();
-    uploadCard.style.display = ''; progressCard.classList.remove('show'); downloadCard.classList.remove('show');
-    logBox.innerHTML = ''; errorBanner.style.display = 'none';
-    STEPS.forEach(function(s){
-      var el = document.getElementById('step-' + s);
-      el.classList.remove('active','done','error'); el.querySelector('.step-icon').innerHTML = STEP_ICONS[s];
-    });
-    document.getElementById('step-generate-desc').textContent = 'Membuat script openpyxl dan mengeksekusinya';
+  btnReset.onclick = reset;
+  function reset() {
+    progressCard.querySelectorAll('.reset-btn').forEach(function(b){ b.remove(); });
+    currentJobId=null; serverDownloadName=null; clearFile();
+    uploadCard.style.display=''; progressCard.classList.remove('show'); downloadCard.classList.remove('show');
+    logBox.innerHTML=''; errorBanner.style.display='none';
+    resetSteps(); $('step-generate-desc').textContent='Membuat script openpyxl dan mengeksekusinya';
   }
 </script>
 
