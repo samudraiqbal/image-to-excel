@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image to Excel — Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e1a;
+      --bg2: #0f1525;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-active: rgba(99,179,237,0.5);
+      --accent: #63b3ed;
+      --accent2: #7c3aed;
+      --accent-glow: rgba(99,179,237,0.15);
+      --success: #48bb78;
+      --success-glow: rgba(72,187,120,0.15);
+      --error: #fc8181;
+      --error-glow: rgba(252,129,129,0.15);
+      --warning: #f6ad55;
+      --text: #e2e8f0;
+      --text-muted: #718096;
+      --text-dim: #4a5568;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    body {
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(99,179,237,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.06) 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,14,26,0.8);
+      backdrop-filter: blur(12px);
+    }
+    .header-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+    .header p { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 48px 40px;
+      max-width: 840px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Upload Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* Drop Zone */
+    #drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    #drop-zone::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--accent-glow);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    #drop-zone:hover, #drop-zone.drag-over {
+      border-color: var(--border-active);
+      background: var(--surface-hover);
+    }
+    #drop-zone:hover::before, #drop-zone.drag-over::before { opacity: 1; }
+    #drop-zone.drag-over { transform: scale(1.01); }
+
+    .drop-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+      transition: transform 0.3s;
+    }
+    #drop-zone:hover .drop-icon { transform: translateY(-4px); }
+    #drop-zone.has-file .drop-icon { font-size: 36px; }
+
+    .drop-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .drop-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .drop-hint span {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Preview */
+    #file-preview {
+      display: none;
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: rgba(99,179,237,0.08);
+      border: 1px solid rgba(99,179,237,0.2);
+      border-radius: 10px;
+      align-items: center;
+      gap: 12px;
+    }
+    #file-preview.show { display: flex; }
+    #preview-thumb {
+      width: 48px; height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+    #preview-info { flex: 1; }
+    #preview-name { font-weight: 500; font-size: 13px; word-break: break-all; }
+    #preview-size { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    #preview-remove {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 18px; padding: 4px; line-height: 1;
+      transition: color 0.2s;
+    }
+    #preview-remove:hover { color: var(--error); }
+
+    #file-input { display: none; }
+
+    /* Generate Button */
+    #btn-generate {
+      width: 100%;
+      padding: 14px 24px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, var(--accent), #4299e1);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.02em;
+    }
+    #btn-generate:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4299e1, #3182ce);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(99,179,237,0.3);
+    }
+    #btn-generate:active:not(:disabled) { transform: translateY(0); }
+    #btn-generate:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Progress Card */
+    #progress-card { display: none; }
+    #progress-card.show { display: block; }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 0;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 44px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+      transition: background 0.4s;
+    }
+    .step.done:not(:last-child)::after { background: var(--success); }
+    .step.active:not(:last-child)::after { background: var(--accent); }
+
+    .step-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .step.active .step-icon {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(99,179,237,0.1);
+    }
+    .step.done .step-icon {
+      border-color: var(--success);
+      background: var(--success-glow);
+      color: var(--success);
+    }
+    .step.error .step-icon {
+      border-color: var(--error);
+      background: var(--error-glow);
+      color: var(--error);
+    }
+
+    .step-body { flex: 1; }
+    .step-title {
+      font-weight: 500;
+      font-size: 13px;
+      transition: color 0.3s;
+    }
+    .step.active .step-title { color: var(--accent); }
+    .step.done .step-title { color: var(--success); }
+    .step.error .step-title { color: var(--error); }
+    .step-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(99,179,237,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Log box */
+    .log-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px 0;
+      border-top: 1px solid var(--border);
+      user-select: none;
+      margin-top: 8px;
+    }
+    .log-toggle:hover { color: var(--text); }
+    .log-toggle .chevron { transition: transform 0.2s; font-size: 10px; }
+    .log-toggle.open .chevron { transform: rotate(180deg); }
+
+    #log-box {
+      display: none;
+      margin-top: 12px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #a0aec0;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.8;
+    }
+    #log-box.show { display: block; }
+    #log-box .log-line { display: block; }
+    #log-box .log-line.success { color: var(--success); }
+    #log-box .log-line.error { color: var(--error); }
+    #log-box .log-line.info { color: var(--accent); }
+
+    /* Download section */
+    #download-card { display: none; }
+    #download-card.show { display: block; }
+
+    .success-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      background: var(--success-glow);
+      border: 1px solid rgba(72,187,120,0.25);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .success-icon { font-size: 32px; }
+    .success-text h3 { font-size: 15px; font-weight: 600; color: var(--success); }
+    .success-text p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    #btn-download {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--success), #38a169);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    #btn-download:hover {
+      background: linear-gradient(135deg, #38a169, #2f855a);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(72,187,120,0.3);
+    }
+
+    #btn-reset {
+      width: 100%;
+      padding: 11px 24px;
+      margin-top: 12px;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #btn-reset:hover { background: var(--surface-hover); color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+    /* Error banner */
+    .error-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--error-glow);
+      border: 1px solid rgba(252,129,129,0.25);
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .error-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .error-banner-text { font-size: 13px; color: var(--error); }
+
+    /* Pulse animation */
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(99,179,237,0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(99,179,237,0); }
+      100% { box-shadow: 0 0 0 0 rgba(99,179,237,0); }
+    }
+    .step.active .step-icon { animation: pulse-ring 1.5s ease-out infinite; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-icon">📊</div>
+  <h1>Image to Excel</h1>
+  <p>Jalankan script Python di lokal, akses via browser</p>
+</header>
+
+<main class="main">
+
+  <!-- Upload Card -->
+  <div class="card" id="upload-card">
+    <div class="card-title">Upload Gambar UI</div>
+
+    <div id="drop-zone">
+      <span class="drop-icon">🖼️</span>
+      <p class="drop-label">Drag & drop gambar di sini</p>
+      <p class="drop-hint">atau <span id="browse-link">pilih file</span> dari komputer</p>
+      <p class="drop-hint" style="margin-top:8px">PNG, JPG — maks. 20 MB</p>
+    </div>
+
+    <div id="file-preview">
+      <img id="preview-thumb" src="" alt="preview" />
+      <div id="preview-info">
+        <div id="preview-name">—</div>
+        <div id="preview-size">—</div>
+      </div>
+      <button id="preview-remove" title="Hapus file">✕</button>
+    </div>
+
+    <input type="file" id="file-input" accept=".png,.jpg,.jpeg" />
+
+    <button id="btn-generate" disabled>
+      <span>✨</span>
+      <span>Generate Excel</span>
+    </button>
+  </div>
+
+  <!-- Progress Card -->
+  <div class="card" id="progress-card">
+    <div class="card-title">Progress</div>
+
+    <div class="steps">
+      <div class="step" id="step-upload">
+        <div class="step-icon">📤</div>
+        <div class="step-body">
+          <div class="step-title">Upload Gambar</div>
+          <div class="step-desc" id="step-upload-desc">Mengunggah gambar ke server lokal</div>
+        </div>
+      </div>
+
+      <div class="step" id="step-analyze">
+        <div class="step-icon">🔍</div>
+        <div class="step-body">
+          <div class="step-title">Analisis Gambar (AI)</div>
+          <div class="step-desc" id="step-analyze-desc">Ekstrak layout UI dari gambar menggunakan Vision AI</div>
+        </div>
+      </div>
+
+      <div class="step" id="step-generate">
+        <div class="step-icon">✨</div>
+        <div class="step-body">
+          <div class="step-title">Generate Excel (LLM + openpyxl)</div>
+          <div class="step-desc" id="step-generate-desc">Membuat script openpyxl dan mengeksekusinya</div>
+        </div>
+      </div>
+
+      <div class="step" id="step-done">
+        <div class="step-icon">✅</div>
+        <div class="step-body">
+          <div class="step-title">Selesai</div>
+          <div class="step-desc" id="step-done-desc">File Excel siap didownload</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-toggle" id="log-toggle">
+      <span>📋 Lihat log output</span>
+      <span class="chevron">▲</span>
+    </div>
+    <div id="log-box"></div>
+
+    <div class="error-banner" id="error-banner" style="display:none;">
+      <span class="error-banner-icon">⚠️</span>
+      <span class="error-banner-text" id="error-message">Terjadi kesalahan.</span>
+    </div>
+  </div>
+
+  <!-- Download Card -->
+  <div class="card" id="download-card">
+    <div class="success-banner">
+      <span class="success-icon">🎉</span>
+      <div class="success-text">
+        <h3>Excel berhasil digenerate!</h3>
+        <p id="download-filename">File siap untuk didownload</p>
+      </div>
+    </div>
+
+    <a id="btn-download" href="#" download>
+      <span>⬇️</span>
+      <span>Download Excel</span>
+    </a>
+
+    <button id="btn-reset">↩ Generate gambar lain</button>
+  </div>
+
+</main>
+
+<script>
+  // ─── State ───────────────────────────────────────────────────────
+  let selectedFile = null;
+  let currentJobId = null;
+
+  // ─── Elements ────────────────────────────────────────────────────
+  const dropZone      = document.getElementById('drop-zone');
+  const fileInput     = document.getElementById('file-input');
+  const browseLink    = document.getElementById('browse-link');
+  const filePreview   = document.getElementById('file-preview');
+  const previewThumb  = document.getElementById('preview-thumb');
+  const previewName   = document.getElementById('preview-name');
+  const previewSize   = document.getElementById('preview-size');
+  const previewRemove = document.getElementById('preview-remove');
+  const btnGenerate   = document.getElementById('btn-generate');
+
+  const uploadCard    = document.getElementById('upload-card');
+  const progressCard  = document.getElementById('progress-card');
+  const downloadCard  = document.getElementById('download-card');
+
+  const logToggle     = document.getElementById('log-toggle');
+  const logBox        = document.getElementById('log-box');
+  const errorBanner   = document.getElementById('error-banner');
+  const errorMessage  = document.getElementById('error-message');
+
+  const btnDownload   = document.getElementById('btn-download');
+  const btnReset      = document.getElementById('btn-reset');
+  const downloadFilename = document.getElementById('download-filename');
+
+  // ─── File selection ───────────────────────────────────────────────
+  browseLink.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('click', (e) => {
+    if (e.target !== browseLink) fileInput.click();
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+  });
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+  });
+
+  previewRemove.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearFile();
+  });
+
+  function setFile(file) {
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowed.includes(file.type)) {
+      alert('Hanya file PNG atau JPG yang diizinkan.');
+      return;
+    }
+    selectedFile = file;
+    previewName.textContent = file.name;
+    previewSize.textContent = formatBytes(file.size);
+
+    const reader = new FileReader();
+    reader.onload = (e) => { previewThumb.src = e.target.result; };
+    reader.readAsDataURL(file);
+
+    filePreview.classList.add('show');
+    dropZone.classList.add('has-file');
+    btnGenerate.disabled = false;
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    fileInput.value = '';
+    filePreview.classList.remove('show');
+    dropZone.classList.remove('has-file');
+    previewThumb.src = '';
+    btnGenerate.disabled = true;
+  }
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // ─── Log toggle ───────────────────────────────────────────────────
+  logToggle.addEventListener('click', () => {
+    logToggle.classList.toggle('open');
+    logBox.classList.toggle('show');
+  });
+
+  function appendLog(text, type = '') {
+    const line = document.createElement('span');
+    line.className = 'log-line' + (type ? ' ' + type : '');
+    line.textContent = text;
+    logBox.appendChild(line);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  // ─── Steps ───────────────────────────────────────────────────────
+  const STEPS = ['upload', 'analyze', 'generate', 'done'];
+
+  function setStep(name, state) { // state: 'active' | 'done' | 'error'
+    const el = document.getElementById('step-' + name);
+    el.classList.remove('active', 'done', 'error');
+    el.classList.add(state);
+    const icon = el.querySelector('.step-icon');
+    if (state === 'active') {
+      icon.innerHTML = '<div class="spinner"></div>';
+    } else if (state === 'done') {
+      icon.textContent = '✓';
+    } else if (state === 'error') {
+      icon.textContent = '✕';
+    }
+  }
+
+  // ─── Generate ─────────────────────────────────────────────────────
+  btnGenerate.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
+    // Reset UI
+    uploadCard.style.display = 'none';
+    progressCard.classList.add('show');
+    downloadCard.classList.remove('show');
+    logBox.innerHTML = '';
+    logBox.classList.remove('show');
+    logToggle.classList.remove('open');
+    errorBanner.style.display = 'none';
+    STEPS.forEach(s => {
+      const el = document.getElementById('step-' + s);
+      el.classList.remove('active', 'done', 'error');
+      el.querySelector('.step-icon').textContent = el.querySelector('.step-icon').dataset.orig || getStepIcon(s);
+    });
+
+    // Step 1: Upload
+    setStep('upload', 'active');
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    let jobId;
+    try {
+      const res = await fetch('/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload gagal');
+      jobId = data.job_id;
+      currentJobId = jobId;
+    } catch (err) {
+      setStep('upload', 'error');
+      showError('Upload gagal: ' + err.message);
+      return;
+    }
+
+    setStep('upload', 'done');
+    setStep('analyze', 'active');
+    appendLog('[*] Upload selesai. Mulai analisis gambar...', 'info');
+
+    // Step 2+3: Stream SSE
+    const sse = new EventSource('/stream/' + jobId);
+
+    sse.addEventListener('log', (e) => {
+      const msg = e.data;
+      appendLog(msg);
+
+      // Update steps based on log content
+      if (msg.includes('JSON layout extracted')) {
+        setStep('analyze', 'done');
+        setStep('generate', 'active');
+      } else if (msg.includes('Running temp_generate')) {
+        document.getElementById('step-generate-desc').textContent = 'Mengeksekusi script Excel...';
+      }
+    });
+
+    sse.addEventListener('done', (e) => {
+      sse.close();
+      setStep('generate', 'done');
+      setStep('done', 'done');
+      appendLog('[+] ' + e.data, 'success');
+      showDownload(jobId, selectedFile.name);
+    });
+
+    sse.addEventListener('error', (e) => {
+      sse.close();
+      const msg = e.data || 'Terjadi kesalahan tidak diketahui.';
+      setStep('generate', 'error');
+      setStep('done', 'error');
+      appendLog('[-] ' + msg, 'error');
+      showError(msg);
+      // Auto open log
+      if (!logBox.classList.contains('show')) {
+        logToggle.classList.add('open');
+        logBox.classList.add('show');
+      }
+    });
+
+    sse.addEventListener('end', () => sse.close());
+
+    // fallback onerror for connection issues
+    sse.onerror = (e) => {
+      if (sse.readyState === EventSource.CLOSED) return;
+      sse.close();
+    };
+  });
+
+  function getStepIcon(name) {
+    return { upload: '📤', analyze: '🔍', generate: '✨', done: '✅' }[name] || '●';
+  }
+
+  function showError(msg) {
+    errorMessage.textContent = msg;
+    errorBanner.style.display = 'flex';
+    // Show reset button in progress card
+    const existingReset = progressCard.querySelector('.reset-in-progress');
+    if (!existingReset) {
+      const btn = document.createElement('button');
+      btn.className = 'reset-in-progress';
+      btn.textContent = '↩ Coba lagi';
+      btn.style.cssText = `
+        width:100%; padding:11px 24px; margin-top:16px;
+        background: var(--surface); color: var(--text-muted);
+        font-size:13px; font-weight:500; border:1px solid var(--border);
+        border-radius:10px; cursor:pointer; transition:all 0.2s ease;
+        font-family: inherit;
+      `;
+      btn.onclick = resetUI;
+      progressCard.appendChild(btn);
+    }
+  }
+
+  function showDownload(jobId, originalName) {
+    const baseName = originalName.replace(/\.[^.]+$/, '') + '.xlsx';
+    downloadFilename.textContent = baseName;
+    btnDownload.href = '/download/' + jobId;
+    btnDownload.download = baseName;
+
+    setTimeout(() => {
+      progressCard.classList.remove('show');
+      downloadCard.classList.add('show');
+    }, 600);
+  }
+
+  // ─── Reset ────────────────────────────────────────────────────────
+  btnReset.addEventListener('click', resetUI);
+
+  function resetUI() {
+    // Remove dynamic reset buttons
+    progressCard.querySelectorAll('.reset-in-progress').forEach(el => el.remove());
+
+    currentJobId = null;
+    clearFile();
+    uploadCard.style.display = '';
+    progressCard.classList.remove('show');
+    downloadCard.classList.remove('show');
+    logBox.innerHTML = '';
+    errorBanner.style.display = 'none';
+
+    STEPS.forEach(s => {
+      const el = document.getElementById('step-' + s);
+      el.classList.remove('active', 'done', 'error');
+      el.querySelector('.step-icon').textContent = getStepIcon(s);
+    });
+    document.getElementById('step-generate-desc').textContent = 'Membuat script openpyxl dan mengeksekusinya';
+  }
+</script>
+
+</body>
+</html>

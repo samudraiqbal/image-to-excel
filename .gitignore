@@ -6,3 +6,7 @@ temp_generate.py
 get-pip.py
 .gitignore
 .env
+
+# Web app uploads (keep folder, ignore contents)
+uploads/*
+!uploads/.gitkeep
