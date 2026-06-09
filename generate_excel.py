@@ -102,7 +102,7 @@ Visual Excel harus merepresentasikan layout UI yang diberikan secara akurat deng
 7. Search Panel / Card - Hanya untuk web_tanpa_modal:
    - Card/Search Panel selalu dimulai di Column C (kiri) dan berakhir di AE (kanan) (lebar tepat 29 kolom grid).
    - Baris mulainya (start_row) harus menyesuaikan keberadaan tombol di atasnya (lihat aturan baris kosong tombol di atas).
-   - Accordion Header: Sel rentang C{start_row}:AE{start_row} diberi fill solid 'FF83CAFF'. Tulis label (e.g., 'Pencarian') di sel C{start_row} (bold, tanpa merge).
+   - Accordion Header: Sel rentang C{start_row}:AE{start_row} diberi fill solid 'FF83CAFF'. Tulis label (e.g., 'Pencarian') di sel C{start_row} (bold, tanpa merge). PENTING: Pastikan loop pengisian warna fill solid 'FF83CAFF' berjalan inklusif dari kolom C (3) sampai AE (31) (gunakan `range(3, 32)` di Python), jangan ada kolom di sebelah kanan (seperti AE) yang terlewat atau tetap putih.
    - Di sekeliling Search Panel/Card (dari C_start_row ke AE_end_row), gambarlah border tipis (L di C, R di AE, T di start_row, B di end_row) sehingga membentuk visual Card yang utuh.
    - Padding Internal Card (Top & Bottom):
      - Berikan jarak **1 baris kosong** di dalam card di bagian paling atas (antara header accordion dengan label field pertama).
@@ -201,17 +201,44 @@ Visual Excel harus merepresentasikan layout UI yang diberikan secara akurat deng
    - Kolom AL ke kanan (AL, AM, AN, AO) TIDAK Boleh menggunakan border/bingkai sel. Latar belakang sel juga normal (tanpa fill).
     - PENTING: Seluruh teks pada kolom keterangan (AL ke kanan) wajib menggunakan font Calibri 10 reguler warna hitam (tidak bold, tidak italic, tidak underline, tidak berwarna biru). Format tombol (biru, bold, italic, underline) HANYA boleh diterapkan pada komponen tombol di dalam layout halaman utama (kolom B sampai AF/N), dan sama sekali TIDAK Boleh diterapkan pada teks apa pun di kolom Keterangan (kolom AL ke kanan) meskipun teks tersebut menyebutkan nama tombol (seperti 'Batal', 'Simpan', '+ Tambah', 'Hapus', 'Konfirmasi').
     - PENTING: Untuk modal, jangan sertakan ikon/tombol close 'x' (yang berfungsi menutup modal) ke dalam daftar kolom Keterangan.
-    - Isi kolom AL-AO dengan format bertingkat/hierarki baris demi baris secara dinamis:
-      - Level 0 (Utama): Tulis nomor indeks (1, 2, 3...) di kolom `AL`, dan nama komponen utama (misal: 'Filter cari', 'Tabel') di kolom `AM`.
-      - Level 1 (Sub-Komponen): Tulis huruf sub-indeks (a, b, c...) di kolom `AM`, dan nama sub-komponen (misal: 'Nama', 'Lokasi kerja') di kolom `AN`.
-      - Level 2 (Detail): Tulis tanda strip/bullet `-` di kolom `AN`, dan isi detail (misal: 'Tipe Input: Dropdown', 'Default: kosong') di kolom `AO`.
-      - Level 3 (Deskripsi Tambahan): Tulis penjelasan deskripsi tambahan langsung di kolom `AM` jika merupakan penjelasan komponen utama, atau di `AO` jika penjelasan detail sub-komponen.
+    - KRITIS - METADATA TERLARANG: Jangan sekali-kali menulis `total_data`, `table_id`, `'Total data: ...'`, `'ID tabel: ...'` atau field JSON teknis lainnya ke dalam kolom Keterangan. Kolom Keterangan HANYA boleh berisi penjelasan fungsional yang bersumber dari field `keterangan` di dalam JSON (bukan dari field JSON level atas seperti `total_data` atau `table_id`).
+    - KRITIS - KETERANGAN DINAMIS: Isi kolom AL-AO secara dinamis berdasarkan struktur JSON yang diberikan:
+      - Iterasi `data['search_panel']['fields']` dan `data['search_panel']['actions']` untuk Search Panel.
+      - Iterasi `data['main_actions']` untuk tombol aksi utama.
+      - Iterasi `data['table']['keterangan_kolom']` untuk kolom tabel. JANGAN gunakan `data['table']['total_data']` atau `data['table']['table_id']`.
+      - Iterasi `data['modal']['fields']` dan `data['modal']['actions']` untuk modal. JANGAN sertakan close button 'x'.
+      - Urutan harus mencerminkan urutan elemen di halaman (atas ke bawah).
+    - Level hierarki keterangan:
+      - Level 0 (Utama): Nomor indeks (1, 2, 3...) di kolom `AL`, nama komponen di kolom `AM`.
+      - Level 1 (Sub-Komponen): Huruf sub-indeks (a, b, c...) di kolom `AM`, nama sub-komponen di kolom `AN`.
+      - Level 2 (Detail): Tanda `-` di kolom `AN`, isi detail di kolom `AO`.
     - Pastikan layout ini dibuat rapi baris demi baris tanpa menggabungkan (merge) sel dan tanpa border sel.
 
 Aturan Teknis Pembuatan Kode openpyxl:
 - Hindari penggunaan method `.copy()` yang deprecated pada objek Alignment atau Font di openpyxl. Jika ingin mengubah alignment, buat objek Alignment baru secara langsung (misal: `cell.alignment = Alignment(wrap_text=False, horizontal='left', vertical='center')`).
-- PENTING: Jangan menyalin properti style dari sel lain menggunakan `target_cell.font = source_cell.font` karena `source_cell.font` dapat mengembalikan objek `StyleProxy` (unhashable) yang akan memicu TypeError ketika disimpan. Sebagai gantinya, jika memformat sel-sel yang di-merge, gunakan variabel Font/Alignment asli (misalnya: `ws.cell(...).font = font_normal`) atau gunakan `from copy import copy; target_cell.font = copy(source_cell.font)`.
-- CRITICAL: Jangan pernah melakukan assignment dari properti style sel ke dirinya sendiri, seperti `cell.font = cell.font` atau `cell.alignment = cell.alignment` atau `cell.border = cell.border`. Hal ini akan memicu TypeError unhashable StyleProxy di openpyxl. Jika ingin mengecek atau mempertahankan font, cukup periksa `if cell.font is None:` (atau lewati saja assignment jika sudah sesuai), tetapi jangan pernah meng-assign `cell.font = cell.font`.
+- PENTING: Jangan menyalin properti style dari sel lain menggunakan `target_cell.font = source_cell.font` karena `source_cell.font` dapat mengembalikan objek `StyleProxy` (unhashable) yang akan memicu TypeError ketika disimpan. Selalu gunakan variabel Font yang sudah didefinisikan (seperti `font_normal`, `font_bold`, `font_btn`) atau buat Font baru secara langsung.
+- CRITICAL - ANTI-PATTERN YANG DILARANG: Berikut adalah pola kode yang SERING SALAH dan HARUS DIHINDARI:
+  ```python
+  # SALAH - ini akan memicu TypeError: unhashable type 'StyleProxy'
+  ws.cell(row, c).font = cell.font if c == c1 else font_normal   # SALAH!
+  ws.cell(row, c).font = other_cell.font                         # SALAH!
+  cell.font = cell.font                                          # SALAH!
+  ```
+  Ganti pola tersebut dengan SELALU menggunakan variabel Font yang sudah didefinisikan:
+  ```python
+  # BENAR - selalu gunakan variabel Font yang terdefinisi, bukan cell.font
+  ws.cell(row=r, column=c).font = font_bold   # header
+  ws.cell(row=r, column=c).font = font_normal # isi biasa
+  ws.cell(row=r, column=c).font = font_btn    # tombol biru
+  ```
+  Definisikan semua variabel Font di awal script:
+  ```python
+  font_normal = Font(name='Calibri', size=10)
+  font_bold   = Font(name='Calibri', size=10, bold=True)
+  font_btn    = Font(name='Calibri', size=10, bold=True, italic=True, underline='single', color='FF0000EE')
+  font_hdr_ket= Font(name='Calibri', size=10, bold=True, color='FFC9211E')
+  ```
+- CRITICAL: Jangan pernah melakukan assignment dari properti style sel ke dirinya sendiri, seperti `cell.font = cell.font` atau `cell.alignment = cell.alignment` atau `cell.border = cell.border`. Hal ini akan memicu TypeError unhashable StyleProxy di openpyxl.
 - Hindari Error Properti Side: Pada openpyxl, properti border seperti `cell.border.top` atau `cell.border.bottom` bisa bernilai `None`. Jangan mengakses `.style` atau properti lain darinya tanpa pemeriksaan `is not None` terlebih dahulu.
 - Untuk menggambar outline border (border luar) saja pada suatu range sel tanpa mempengaruhi border sel lainnya, buat dan gunakan helper function berikut:
   ```python
@@ -259,7 +286,7 @@ Pastikan:
 - PENTING: Jangan beri border horizontal apa pun pada baris judul kontainer (B5:AF5 untuk web_tanpa_modal, atau B5:N5 untuk web_dengan_modal) baik di bagian atas maupun di bagian bawah baris tersebut. Baris ini hanya boleh memiliki border vertikal di tepi paling luar (L=thin pada B5, dan R=thin pada AF5/N5) sebagai bagian dari border luar kontainer, tetapi harus bersih dari border horizontal atas/bawah.
 - Gunakan format tombol biru untuk semua tombol.
 - Buat posisi tombol dinamis (misal: tombol '+ Tambah' diletakkan di sel `C7` jika posisinya 'top-left', dengan 1 baris kosong di atasnya (Row 6) dan 1 baris kosong di bawahnya (Row 8), sehingga card dimulai di Row 9).
-- Card / Search Panel selalu dimulai di Column C (kiri) dan berakhir di AE (kanan) (lebar tepat 29 kolom grid).
+- Card / Search Panel selalu dimulai di Column C (kiri) dan berakhir di AE (kanan) (lebar tepat 29 kolom grid). PENTING: Loop pengisian warna fill solid header accordion Search Panel harus berjalan inklusif dari kolom C (3) sampai AE (31) menggunakan `range(3, 32)`. Jangan berhenti di kolom 30 atau 31 saja — AE (kolom 31) HARUS memiliki fill color yang sama dengan kolom lainnya.
 - Berikan **1 baris kosong** padding di dalam card pada bagian paling atas (antara header accordion dengan label field pertama) dan **1 baris kosong** padding di bagian paling bawah (antara tombol Cari dengan border bawah card).
 - Di dalam Search Panel: berikan jarak/margin 1 kolom dari border kiri dan kanan (sehingga field label and input dimulai dari kolom D, dan input box membentang dari D sampai AD).
 - Untuk input field dan dropdown di search panel, **jangan berikan border sel individual**, melainkan beri **border luar (outline border) saja** pada rentang 6 kolom input tersebut (misal D:I).
@@ -275,7 +302,7 @@ Pastikan:
 - **PENTING: Jangan gunakan `ws.merge_cells` untuk nama kolom (header) maupun baris data di dalam tabel!** Kita tidak menggabungkan sel untuk data tabel. Sebaliknya, jika suatu kolom memiliki span grid `c1` ke `c2`:
   - Tulis nilai header/data di sel kolom pertama `c1`.
   - Terapkan outline border di sekeliling area `c1` sampai `c2` (top/bottom border di semua sel `c1:c2`, left border di `c1`, dan right border di `c2`) untuk membuat visualnya terlihat menyatu seperti satu kolom besar.
-  - Khusus baris header: jika sebuah kolom header mewakili span `c1` ke `c2` (lebar lebih dari 1 kolom), terapkan outline border pada rentang `c1` sampai `c2` pada baris header tersebut (top/bottom di semua sel `c1:c2`, left border hanya di `c1`, dan right border hanya di `c2`). Jangan sekali-kali menerapkan border kiri/kanan di dalam sel-sel tengah span tersebut (ini untuk menghindari adanya garis border vertikal vertikal yang membagi satu kolom header).
+  - Khusus baris header: jika sebuah kolom header mewakili span `c1` ke `c2` (lebar lebih dari 1 kolom), terapkan outline border pada rentang `c1` sampai `c2` pada baris header tersebut (top/bottom di semua sel `c1:c2`, left border hanya di `c1`, dan right border hanya di `c2`). PENTING SEKALI: Untuk sel-sel di dalam span (kolom c1+1 hingga c2-1), jangan pernah menambahkan border kiri atau border kanan sama sekali. Pastikan loop border tidak meng-assign `left` atau `right` border ke sel-sel tengah span tersebut. Ini kritis untuk menghindari garis vertikal yang membelah header menjadi beberapa bagian kecil.
 - Jika terdapat checkbox (kolom dengan header empty string `""` yang mewakili checkbox), isi **sel header** dan **sel data** pada kolom checkbox tersebut dengan tulisan **"x"** (huruf x kecil, format bold, italic, single underline, warna biru `'FF0000EE'`, alignment center). Tulisan "x" di header ini berfungsi sebagai tombol select all. Jangan mengubah lebar kolom checkbox secara manual, biarkan default defaultColWidth.
 - Tambahkan karakter ' ▿' di belakang nama header kolom tabel, kecuali kolom yang tidak memiliki label (empty header atau checkbox yang diisi 'x') dan kolom aksi.
 - Header tabel (baris judul kolom) TIDAK boleh menggunakan fill color (biarkan latar belakang putih/no fill).
@@ -295,6 +322,13 @@ Pastikan:
 - PENTING: Penjelasan pertama di kolom keterangan harus diletakkan tepat di baris bawah header 'Keterangan' (yaitu Row 5) tanpa ada jarak baris kosong.
 - PENTING: Seluruh teks pada kolom keterangan (AL ke kanan) wajib menggunakan font Calibri 10 reguler warna hitam (tidak bold, tidak italic, tidak underline, tidak berwarna biru). Format tombol (biru, bold, italic, underline) HANYA boleh diterapkan pada komponen tombol di dalam layout halaman utama (kolom B sampai AF/N), dan sama sekali TIDAK Boleh diterapkan pada teks apa pun di kolom Keterangan (kolom AL ke kanan) meskipun teks tersebut menyebutkan nama tombol (seperti 'Batal', 'Simpan', '+ Tambah', 'Hapus', 'Konfirmasi').
 - PENTING: Untuk modal, jangan sertakan ikon/tombol close 'x' (yang berfungsi menutup modal) ke dalam daftar kolom Keterangan.
+- KRITIS - METADATA TERLARANG DI KETERANGAN: Jangan sekali-kali menulis nilai-nilai metadata berikut ke dalam kolom Keterangan (AL ke kanan): `total_data`, `table_id`, `"Total data: ..."`, `"ID tabel: ..."`, atau field JSON teknis lainnya yang bukan merupakan deskripsi fungsional komponen. Kolom Keterangan HANYA boleh berisi penjelasan fungsional tentang: nama komponen, label field, deskripsi aksi tombol, dan penjelasan kolom tabel — semuanya bersumber dari field `keterangan` di dalam JSON (bukan dari field JSON level atas seperti `total_data` atau `table_id`).
+- KRITIS - KETERANGAN DINAMIS: Bangun isi kolom Keterangan secara dinamis berdasarkan struktur JSON yang diberikan:
+  - Untuk `search_panel`: iterasi `data['search_panel']['fields']` dan `data['search_panel']['actions']` — gunakan `field['keterangan']` untuk mengisi detail.
+  - Untuk `main_actions`: iterasi `data['main_actions']` — gunakan `action['keterangan']` untuk mengisi deskripsi tombol.
+  - Untuk `table`: iterasi `data['table']['keterangan_kolom']` — gunakan `item['deskripsi']` untuk mengisi detail kolom. JANGAN gunakan `data['table']['total_data']` atau `data['table']['table_id']` untuk keterangan.
+  - Untuk `modal`: iterasi `data['modal']['fields']` dan `data['modal']['actions']` — gunakan `field['keterangan']` untuk mengisi detail. JANGAN sertakan close button 'x' modal.
+  - Urutan komponen di Keterangan harus mencerminkan urutan kemunculan elemen di halaman (dari atas ke bawah).
 """
 
     print("[*] Calling LLM to generate the openpyxl script...")
