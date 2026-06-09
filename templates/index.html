@@ -207,6 +207,61 @@
       box-shadow: none;
     }
 
+    /* Filename input */
+    .input-group {
+      margin-top: 16px;
+    }
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      letter-spacing: 0.03em;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-row:focus-within {
+      border-color: var(--border-active);
+      box-shadow: 0 0 0 3px rgba(99,179,237,0.1);
+    }
+    .input-prefix {
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.03);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+    }
+    .input-suffix {
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.03);
+      border-left: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+    }
+    #output-name {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: inherit;
+    }
+    #output-name::placeholder { color: var(--text-dim); }
+
     /* Progress Card */
     #progress-card { display: none; }
     #progress-card.show { display: block; }
@@ -445,6 +500,16 @@
 
     <input type="file" id="file-input" accept=".png,.jpg,.jpeg" />
 
+    <!-- Output filename input -->
+    <div class="input-group">
+      <label class="input-label" for="output-name">Nama file output (opsional)</label>
+      <div class="input-row">
+        <span class="input-prefix">📄</span>
+        <input type="text" id="output-name" placeholder="Kosongkan untuk pakai nama gambar" maxlength="100" />
+        <span class="input-suffix">.xlsx</span>
+      </div>
+    </div>
+
     <button id="btn-generate" disabled>
       <span>✨</span>
       <span>Generate Excel</span>
@@ -546,9 +611,10 @@
   const errorBanner   = document.getElementById('error-banner');
   const errorMessage  = document.getElementById('error-message');
 
-  const btnDownload   = document.getElementById('btn-download');
-  const btnReset      = document.getElementById('btn-reset');
+  const btnDownload      = document.getElementById('btn-download');
+  const btnReset         = document.getElementById('btn-reset');
   const downloadFilename = document.getElementById('download-filename');
+  const outputNameInput  = document.getElementById('output-name');
 
   // ─── File selection ───────────────────────────────────────────────
   browseLink.addEventListener('click', () => fileInput.click());
@@ -603,6 +669,7 @@
     dropZone.classList.remove('has-file');
     previewThumb.src = '';
     btnGenerate.disabled = true;
+    outputNameInput.value = '';
   }
 
   function formatBytes(bytes) {
@@ -665,13 +732,16 @@
 
     const formData = new FormData();
     formData.append('image', selectedFile);
+    const customName = outputNameInput.value.trim();
+    if (customName) formData.append('output_name', customName);
 
-    let jobId;
+    let jobId, serverDownloadName;
     try {
       const res = await fetch('/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload gagal');
       jobId = data.job_id;
+      serverDownloadName = data.download_name;  // use server-confirmed name
       currentJobId = jobId;
     } catch (err) {
       setStep('upload', 'error');
@@ -704,7 +774,7 @@
       setStep('generate', 'done');
       setStep('done', 'done');
       appendLog('[+] ' + e.data, 'success');
-      showDownload(jobId, selectedFile.name);
+      showDownload(jobId, serverDownloadName);
     });
 
     sse.addEventListener('error', (e) => {
@@ -755,11 +825,35 @@
     }
   }
 
-  function showDownload(jobId, originalName) {
-    const baseName = originalName.replace(/\.[^.]+$/, '') + '.xlsx';
-    downloadFilename.textContent = baseName;
-    btnDownload.href = '/download/' + jobId;
-    btnDownload.download = baseName;
+  function showDownload(jobId, dlName) {
+    // dlName is the server-confirmed filename (e.g. "Laporan TKU.xlsx")
+    downloadFilename.textContent = dlName || 'output.xlsx';
+
+    // Use fetch+blob to guarantee the correct filename regardless of
+    // browser Content-Disposition handling
+    btnDownload.onclick = async (e) => {
+      e.preventDefault();
+      btnDownload.style.opacity = '0.7';
+      btnDownload.querySelector('span:last-child').textContent = 'Mengunduh...';
+      try {
+        const res = await fetch('/download/' + jobId);
+        if (!res.ok) throw new Error('Download gagal');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = dlName || 'output.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert('Download gagal: ' + err.message);
+      } finally {
+        btnDownload.style.opacity = '';
+        btnDownload.querySelector('span:last-child').textContent = 'Download Excel';
+      }
+    };
 
     setTimeout(() => {
       progressCard.classList.remove('show');

@@ -4,7 +4,8 @@ import uuid
 import queue
 import threading
 import subprocess
-from flask import Flask, request, Response, send_file, render_template, jsonify
+from urllib.parse import quote
+from flask import Flask, request, Response, send_file, render_template, jsonify, make_response
 
 # Pure Python .env loader
 if os.path.exists(".env"):
@@ -55,12 +56,22 @@ def upload():
 
     output_xlsx = os.path.splitext(image_path)[0] + ".xlsx"
 
+    # Use user-provided output name, or fall back to original filename stem
+    custom_name = request.form.get("output_name", "").strip()
+    if custom_name:
+        # Sanitize: remove path separators and illegal chars
+        safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_ ()[]")
+        custom_name = "".join(c for c in custom_name if c in safe_chars).strip()
+    if not custom_name:
+        custom_name = os.path.splitext(file.filename)[0]
+    download_name = custom_name + ".xlsx"
+
     q: queue.Queue = queue.Queue()
     jobs[job_id] = {
         "queue": q,
         "output_file": output_xlsx,
         "status": "running",
-        "original_filename": os.path.splitext(file.filename)[0],
+        "download_name": download_name,
     }
 
     # Run generate_excel.py in a background thread
@@ -95,7 +106,7 @@ def upload():
     t = threading.Thread(target=run_generation, daemon=True)
     t.start()
 
-    return jsonify({"job_id": job_id, "filename": file.filename})
+    return jsonify({"job_id": job_id, "filename": file.filename, "download_name": download_name})
 
 
 @app.route("/stream/<job_id>")
@@ -140,12 +151,16 @@ def download(job_id: str):
     if not os.path.exists(output_file):
         return jsonify({"error": "Output file not found"}), 404
 
-    download_name = job.get("original_filename", "output") + ".xlsx"
-    return send_file(
-        output_file,
-        as_attachment=True,
-        download_name=download_name,
+    download_name = job.get("download_name", "output.xlsx")
+
+    # Build response with explicit Content-Disposition to avoid UUID filename bug
+    response = make_response(send_file(output_file, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+    # RFC 5987 encoding for non-ASCII filenames
+    encoded_name = quote(download_name, safe="")
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename=\"{download_name}\"; filename*=UTF-8''{encoded_name}"
     )
+    return response
 
 
 if __name__ == "__main__":
